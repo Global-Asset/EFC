@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#0a0c12">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVGSWNvaW4gV2FsbGV0IiwKICAic2hvcnRfbmFtZSI6ICJFRkMiLAogICJkZXNjcmlwdGlvbiI6ICJTZWxmLWN1c3RvZGlhbCB3YWxsZXQgZm9yIEVmaWtjb2luIEVGQyAtIENvaW4gaXMgTGlmZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGEwYzEyIiwKICAidGhlbWVfY29sb3IiOiAiIzBhMGMxMiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDUxMiA1MTInPjxyZWN0IHdpZHRoPSc1MTInIGhlaWdodD0nNTEyJyByeD0nNTAnIGZpbGw9JyMwYTBjMTInLz48dGV4dCB4PSc1MCUnIHk9JzUwJScgZG9taW5hbnQtYmFzZWxpbmU9J2NlbnRyYWwnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtc2l6ZT0nMjUwJyBmaWxsPScjOGI1Y2Y2Jz5FRkM8L3RleHQ+PC9zdmc+IgogICAgfQogIF0KfQ==">
+  <title>EFC Wallet – Coin is Life</title>
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.11/dist/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* --- RESET & BASE --- */
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Outfit', sans-serif; }
+    body { background: #0a0c12; color: #eef2ff; min-height:100vh; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+    .glass { background: rgba(15,23,42,0.7); backdrop-filter: blur(24px); border: 1px solid rgba(148,163,184,0.15); border-radius: 1.5rem; padding: 1.5rem; }
+    .glass-dark { background: rgba(10,12,18,0.9); backdrop-filter: blur(32px); border: 1px solid rgba(148,163,184,0.1); }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; padding: 0.7rem 1.8rem; border-radius: 2rem; color: white; font-weight: 700; transition: 0.3s; cursor: pointer; }
+    .btn-primary:hover { transform: scale(1.03); box-shadow: 0 0 25px #8b5cf6aa; }
+    .btn-secondary { background: #1e293b; border: 1px solid #475569; padding: 0.7rem 1.8rem; border-radius: 2rem; color: white; font-weight: 600; transition: 0.2s; cursor: pointer; }
+    .btn-secondary:hover { background: #334155; }
+    .btn-outline { background: transparent; border: 1px solid #8b5cf6; padding: 0.7rem 1.8rem; border-radius: 2rem; color: #8b5cf6; font-weight: 600; transition: 0.2s; cursor: pointer; }
+    .btn-outline:hover { background: #8b5cf622; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 1.5rem; }
+    .input-field { background: #0f172a; border: 1px solid #334155; padding: 0.8rem; border-radius: 1rem; width: 100%; color: white; }
+    .input-field:focus { border-color: #8b5cf6; outline: none; }
+    .tab { padding: 0.6rem 1.2rem; border-radius: 2rem; background: #1e293b; cursor: pointer; font-weight: 600; transition: 0.2s; display: inline-block; }
+    .tab.active { background: #8b5cf6; }
+    .tab:hover { background: #334155; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; border-left: 4px solid #3b82f6; padding: 0.8rem 1.5rem; border-radius: 1rem; z-index: 9999; box-shadow: 0 10px 25px #00000055; display: none; align-items: center; gap: 0.8rem; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: #000000aa; backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; }
+    .modal-box { background: #0f172a; padding: 2rem; border-radius: 2rem; max-width: 500px; width: 90%; border: 1px solid #8b5cf6; max-height: 80vh; overflow-y: auto; }
+    .badge { background: #1e293b; padding: 0.2rem 0.8rem; border-radius: 2rem; font-size: 0.7rem; }
+    .text-sm { font-size: 0.9rem; color: #94a3b8; }
+    .text-gold { color: #facc15; }
+    .mt-2 { margin-top: 0.8rem; }
+    .mt-4 { margin-top: 1.5rem; }
+    .mb-2 { margin-bottom: 0.8rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .p2p-offer { background: #1e293b; padding: 1rem; border-radius: 1rem; margin-bottom: 0.8rem; border-left: 4px solid #3b82f6; }
+    .lang-selector { cursor: pointer; background: #1e293b; padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.8rem; transition: 0.2s; }
+    .lang-selector:hover { background: #334155; }
+    #qrContainer { background: white; padding: 0.5rem; border-radius: 1rem; display: inline-block; }
+    @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toastMsg"></span></div>
+<div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalContent"></div></div>
+
+<div class="container">
+  <!-- Language Selector & Nav -->
+  <nav class="glass flex-between" style="padding:0.8rem 1.5rem;">
+    <div><i class="fas fa-coins text-2xl text-indigo-400"></i> <span class="font-bold text-xl" data-i18n="app_name">EFC Wallet</span> <span class="badge">BETA</span></div>
+    <div class="flex-between gap-2">
+      <select id="networkSelect" class="bg-gray-800 border border-gray-700 rounded-full px-3 py-1 text-sm">
+        <option value="56">BNB Smart Chain</option>
+        <option value="1">Ethereum</option>
+        <option value="137">Polygon</option>
+      </select>
+      <button id="connectBtn" class="btn-primary"><i class="fas fa-wallet"></i> <span data-i18n="connect_btn">Connect</span></button>
+      <span id="walletStatus" class="text-sm" data-i18n="not_connected">Not connected</span>
+      <span class="lang-selector" id="langSelector">🌐</span>
+    </div>
+  </nav>
+
+  <!-- Hero & Ecosystem (Landing) -->
+  <section class="mt-4 text-center">
+    <h1 class="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent"><span data-i18n="hero_title1">COIN IS LIFE</span><br><span class="text-2xl md:text-4xl" data-i18n="hero_title2">LIFE IS COIN</span></h1>
+    <p class="text-gray-300 max-w-2xl mx-auto mt-4" data-i18n="hero_desc">In love we build the good nation. Pay school fees, buy food, shop globally with Efikcoin EFC. Self-custodial wallet, staking rewards, charity empowerment — for this generation and the next.</p>
+    <div class="flex flex-wrap gap-4 justify-center mt-6">
+      <button id="createWalletBtn" class="btn-secondary"><i class="fas fa-plus"></i> <span data-i18n="create_wallet_btn">Create Wallet</span></button>
+      <button id="importWalletBtn" class="btn-secondary"><i class="fas fa-key"></i> <span data-i18n="import_wallet_btn">Import Wallet</span></button>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 glass p-4 rounded-3xl max-w-3xl mx-auto">
+      <div><p class="text-sm text-gray-400" data-i18n="price_label">EFC Price</p><p id="efcPrice" class="text-xl font-bold">$0.00</p></div>
+      <div><p class="text-sm text-gray-400" data-i18n="holders_label">Holders</p><p id="holdersCount" class="text-xl font-bold">9,200+</p></div>
+      <div><p class="text-sm text-gray-400" data-i18n="apy_label">Staking APY</p><p id="apyValue" class="text-xl font-bold text-green-400">14%</p></div>
+      <div><p class="text-sm text-gray-400" data-i18n="global_label">Global Access</p><p class="text-xl font-bold">24/7</p></div>
+    </div>
+  </section>
+
+  <!-- Wallet Dashboard -->
+  <div class="glass mt-4">
+    <div class="flex-between">
+      <h2><i class="fas fa-chart-pie"></i> <span data-i18n="wallet_title">My Wallet</span></h2>
+      <div>
+        <button id="refreshBtn" class="btn-secondary"><i class="fas fa-sync-alt"></i></button>
+        <button id="downloadAppBtn" class="btn-secondary"><i class="fas fa-download"></i> <span data-i18n="download_btn">Install App</span></button>
+      </div>
+    </div>
+    <div class="grid-2 mt-4">
+      <div>
+        <div class="glass-dark" style="padding:1.2rem;">
+          <p class="text-sm" data-i18n="total_balance">Total Balance (USD)</p>
+          <p class="text-3xl font-bold" id="totalBalance">$0.00</p>
+          <div class="flex-between mt-2">
+            <span><span class="text-sm" data-i18n="efc_balance">EFC:</span> <span id="efcBalance">0.00</span></span>
+            <span><span class="text-sm" data-i18n="native_balance">BNB/ETH:</span> <span id="nativeBalance">0.00</span></span>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button id="sendBtn" class="btn-primary"><i class="fas fa-paper-plane"></i> <span data-i18n="send_btn">Send</span></button>
+            <button id="receiveBtn" class="btn-secondary"><i class="fas fa-qrcode"></i> <span data-i18n="receive_btn">Receive</span></button>
+            <button id="addTokenBtn" class="btn-secondary"><i class="fas fa-plus-circle"></i> <span data-i18n="add_token_btn">Add Token</span></button>
+          </div>
+          <div class="mt-2 text-sm text-gray-400"><span data-i18n="address_label">Address:</span> <span id="walletAddress" class="font-mono break-all">0x...</span></div>
+        </div>
+        <div class="glass-dark mt-4"><h3><i class="fas fa-chart-line"></i> <span data-i18n="chart_label">Portfolio</span></h3><canvas id="portfolioChart" height="120"></canvas></div>
+      </div>
+      <div>
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-2">
+          <span class="tab active" data-tab="staking" data-i18n="staking_tab">Staking</span>
+          <span class="tab" data-tab="p2p" data-i18n="p2p_tab">P2P</span>
+          <span class="tab" data-tab="history" data-i18n="history_tab">History</span>
+        </div>
+        <!-- Staking -->
+        <div id="stakingTab" class="glass-dark">
+          <h3><i class="fas fa-lock"></i> <span data-i18n="staking_title">Staking</span></h3>
+          <div class="flex-between"><span data-i18n="staked_label">Your Staked:</span> <span id="stakedAmount">0.00 EFC</span></div>
+          <div class="flex-between"><span data-i18n="pending_label">Pending Rewards:</span> <span id="pendingReward">0.00 EFC</span></div>
+          <div class="flex-between"><span data-i18n="total_pool_label">Total Pool:</span> <span id="totalPool">0.00 EFC</span></div>
+          <div class="flex gap-2 mt-2">
+            <input type="number" id="stakeInput" placeholder="Amount" class="input-field" style="width:60%;">
+            <button id="stakeBtn" class="btn-primary"><span data-i18n="stake_btn">Stake</span></button>
+            <button id="unstakeBtn" class="btn-secondary"><span data-i18n="unstake_btn">Unstake</span></button>
+          </div>
+          <button id="claimRewardBtn" class="btn-secondary mt-2 w-full"><i class="fas fa-gift"></i> <span data-i18n="claim_btn">Claim Rewards</span></button>
+        </div>
+        <!-- P2P -->
+        <div id="p2pTab" class="glass-dark hidden">
+          <h3><i class="fas fa-handshake"></i> <span data-i18n="p2p_title">P2P Trading</span></h3>
+          <p class="text-sm" data-i18n="p2p_desc">Buy or sell EFC with other users (local offers).</p>
+          <div class="flex gap-2 mt-2">
+            <input type="text" id="p2pAmount" placeholder="Amount" class="input-field" style="width:35%;">
+            <input type="text" id="p2pPrice" placeholder="Price (USDT)" class="input-field" style="width:35%;">
+            <select id="p2pType" class="input-field" style="width:30%;"><option value="buy" data-i18n="buy_option">Buy</option><option value="sell" data-i18n="sell_option">Sell</option></select>
+          </div>
+          <button id="p2pCreateBtn" class="btn-primary mt-2"><span data-i18n="create_offer_btn">Create Offer</span></button>
+          <div id="p2pOffers" class="mt-3"></div>
+        </div>
+        <!-- History -->
+        <div id="historyTab" class="glass-dark hidden">
+          <h3><i class="fas fa-history"></i> <span data-i18n="history_title">Transactions</span></h3>
+          <div id="historyList" class="text-sm"><p class="text-gray-400" data-i18n="no_history">No transactions yet.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charity & Whitepaper -->
+  <section class="mt-4 glass" style="background-image:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200'); background-size:cover; background-position:center; transition: background-image 1.2s;" id="charityBg">
+    <div class="text-center p-8">
+      <h2 class="text-3xl font-bold"><i class="fas fa-hand-holding-heart"></i> <span data-i18n="charity_title">Charity Empowerment</span></h2>
+      <p class="max-w-2xl mx-auto mt-2" data-i18n="charity_desc">Efikcoin donates 2% of treasury to education, hunger relief, and clean water projects. In love we build the good nation.</p>
+      <div class="grid-3 mt-4">
+        <div><i class="fas fa-book-open text-4xl"></i> <p data-i18n="charity_stat1">100+ school supplies</p></div>
+        <div><i class="fas fa-utensils text-4xl"></i> <p data-i18n="charity_stat2">20,000 meals funded</p></div>
+        <div><i class="fas fa-water text-4xl"></i> <p data-i18n="charity_stat3">Water wells in Africa</p></div>
+      </div>
+      <div class="flex gap-3 justify-center mt-4">
+        <a href="https://efikcoineternalv.github.io/Charity-Empowerment/" target="_blank" class="btn-outline"><span data-i18n="charity_link1">Official Portal</span></a>
+        <a href="https://charityempowerment.netlify.app/" target="_blank" class="btn-outline"><span data-i18n="charity_link2">Mirror Site</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Whitepaper -->
+  <section class="glass mt-4">
+    <h2 class="text-2xl font-bold"><span data-i18n="whitepaper_title">Efikcoin Whitepaper – Coin is Life</span></h2>
+    <div class="grid-2 mt-2">
+      <div>
+        <p><strong data-i18n="network_label">Network:</strong> BNB Smart Chain (BEP-20)</p>
+        <p><strong data-i18n="contract_label">Contract:</strong> <span class="font-mono text-xs break-all">0x677ce9cba67f7484ea951a12897ce780cfd8fed1</span></p>
+        <p><strong data-i18n="treasury_label">Treasury:</strong> <span class="font-mono text-xs break-all">0x676cCf34C191a9D6EFE4B265b84877C619A559d0</span></p>
+        <p><strong data-i18n="lp_label">LP Pair V2:</strong> <span class="font-mono text-xs break-all">0xa1DD6C528882Dc19EcCbC967F50bBC121A29630e</span></p>
+      </div>
+      <ul class="list-disc pl-5">
+        <li data-i18n="feature1">✓ Real‑World Payments (School, Food, Shopping)</li>
+        <li data-i18n="feature2">✓ Self‑Custodial Wallet</li>
+        <li data-i18n="feature3">✓ Staking Rewards 14% APY</li>
+        <li data-i18n="feature4">✓ Airdrop & Loyalty Program</li>
+        <li data-i18n="feature5">✓ Charity Treasury (2% tax)</li>
+      </ul>
+    </div>
+    <div class="text-center text-yellow-200 text-sm italic mt-4" data-i18n="whitepaper_motto">"For this generation and the next — in love we build the good nation."</div>
+  </section>
+
+  <footer class="text-center text-gray-500 text-sm mt-8 border-t border-gray-800 pt-4">
+    <p>© 2025 Efikcoin EFC — <span data-i18n="footer_text">Decentralized for mankind. No data selling. Your keys, your life.</span></p>
+  </footer>
+</div>
+
+<script>
+// ====================== CONFIGURATION ======================
+const TOKEN_ADDRESS = "0x677ce9cba67f7484ea951a12897ce780cfd8fed1";
+const TREASURY = "0x676cCf34C191a9D6EFE4B265b84877C619A559d0";
+const LP = "0xa1DD6C528882Dc19EcCbC967F50bBC121A29630e";
+const DEPLOYER = "0xC5AD5cfcF81AD63a94227334b898eafCe6B27cCA";
+const CHAIN_ID = 56;
+const EFC_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
+  "function transfer(address,uint256) returns (bool)",
+  "function approve(address,uint256) returns (bool)",
+  "function staked(address) view returns (uint256)",
+  "function pendingReward(address) view returns (uint256)",
+  "function totalStaked() view returns (uint256)",
+  "function deposit(uint256)",
+  "function withdraw(uint256)",
+  "function claimRewards()",
+  "function APY() view returns (uint256)"
+];
+
+// ====================== LANGUAGE SYSTEM ======================
+const i18n = {
+  en: {
+    app_name: "EFC Wallet",
+    connect_btn: "Connect",
+    not_connected: "Not connected",
+    hero_title1: "COIN IS LIFE",
+    hero_title2: "LIFE IS COIN",
+    hero_desc: "In love we build the good nation. Pay school fees, buy food, shop globally with Efikcoin EFC. Self-custodial wallet, staking rewards, charity empowerment — for this generation and the next.",
+    create_wallet_btn: "Create Wallet",
+    import_wallet_btn: "Import Wallet",
+    price_label: "EFC Price",
+    holders_label: "Holders",
+    apy_label: "Staking APY",
+    global_label: "Global Access",
+    wallet_title: "My Wallet",
+    download_btn: "Install App",
+    total_balance: "Total Balance (USD)",
+    efc_balance: "EFC:",
+    native_balance: "BNB/ETH:",
+    send_btn: "Send",
+    receive_btn: "Receive",
+    add_token_btn: "Add Token",
+    address_label: "Address:",
+    chart_label: "Portfolio",
+    staking_tab: "Staking",
+    p2p_tab: "P2P",
+    history_tab: "History",
+    staking_title: "Staking",
+    staked_label: "Your Staked:",
+    pending_label: "Pending Rewards:",
+    total_pool_label: "Total Pool:",
+    stake_btn: "Stake",
+    unstake_btn: "Unstake",
+    claim_btn: "Claim Rewards",
+    p2p_title: "P2P Trading",
+    p2p_desc: "Buy or sell EFC with other users (local offers).",
+    buy_option: "Buy",
+    sell_option: "Sell",
+    create_offer_btn: "Create Offer",
+    history_title: "Transactions",
+    no_history: "No transactions yet.",
+    charity_title: "Charity Empowerment",
+    charity_desc: "Efikcoin donates 2% of treasury to education, hunger relief, and clean water projects. In love we build the good nation.",
+    charity_stat1: "100+ school supplies",
+    charity_stat2: "20,000 meals funded",
+    charity_stat3: "Water wells in Africa",
+    charity_link1: "Official Portal",
+    charity_link2: "Mirror Site",
+    whitepaper_title: "Efikcoin Whitepaper – Coin is Life",
+    network_label: "Network:",
+    contract_label: "Contract:",
+    treasury_label: "Treasury:",
+    lp_label: "LP Pair V2:",
+    feature1: "✓ Real-World Payments (School, Food, Shopping)",
+    feature2: "✓ Self-Custodial Wallet",
+    feature3: "✓ Staking Rewards 14% APY",
+    feature4: "✓ Airdrop & Loyalty Program",
+    feature5: "✓ Charity Treasury (2% tax)",
+    whitepaper_motto: '"For this generation and the next — in love we build the good nation."',
+    footer_text: "Decentralized for mankind. No data selling. Your keys, your life."
+  },
+  fr: {
+    app_name: "Portefeuille EFC",
+    connect_btn: "Connecter",
+    not_connected: "Non connecté",
+    hero_title1: "LA PIÈCE EST LA VIE",
+    hero_title2: "LA VIE EST LA PIÈCE",
+    hero_desc: "Avec amour, nous bâtissons la bonne nation. Payez les frais de scolarité, achetez de la nourriture, faites vos achats mondialement avec Efikcoin EFC. Portefeuille auto-dépositaire, récompenses de staking, autonomisation caritative — pour cette génération et la suivante.",
+    create_wallet_btn: "Créer un portefeuille",
+    import_wallet_btn: "Importer un portefeuille",
+    price_label: "Prix EFC",
+    holders_label: "Détenteurs",
+    apy_label: "APY de Staking",
+    global_label: "Accès mondial",
+    wallet_title: "Mon Portefeuille",
+    download_btn: "Installer l'App",
+    total_balance: "Solde total (USD)",
+    efc_balance: "EFC :",
+    native_balance: "BNB/ETH :",
+    send_btn: "Envoyer",
+    receive_btn: "Recevoir",
+    add_token_btn: "Ajouter le jeton",
+    address_label: "Adresse :",
+    chart_label: "Portefeuille",
+    staking_tab: "Staking",
+    p2p_tab: "P2P",
+    history_tab: "Historique",
+    staking_title: "Staking",
+    staked_label: "Votre mise :",
+    pending_label: "Récompenses en attente :",
+    total_pool_label: "Pool total :",
+    stake_btn: "Miser",
+    unstake_btn: "Démiser",
+    claim_btn: "Réclamer les récompenses",
+    p2p_title: "Échange P2P",
+    p2p_desc: "Achetez ou vendez EFC avec d'autres utilisateurs (offres locales).",
+    buy_option: "Acheter",
+    sell_option: "Vendre",
+    create_offer_btn: "Créer une offre",
+    history_title: "Transactions",
+    no_history: "Aucune transaction.",
+    charity_title: "Autonomisation caritative",
+    charity_desc: "Efikcoin donne 2% de la trésorerie à l'éducation, à la lutte contre la faim et aux projets d'eau potable. Avec amour, nous bâtissons la bonne nation.",
+    charity_stat1: "100+ fournitures scolaires",
+    charity_stat2: "20 000 repas financés",
+    charity_stat3: "Puits d'eau en Afrique",
+    charity_link1: "Portail officiel",
+    charity_link2: "Site miroir",
+    whitepaper_title: "Livre blanc Efikcoin – La pièce est la vie",
+    network_label: "Réseau :",
+    contract_label: "Contrat :",
+    treasury_label: "Trésorerie :",
+    lp_label: "LP Pair V2 :",
+    feature1: "✓ Paiements concrets (École, Nourriture, Shopping)",
+    feature2: "✓ Portefeuille auto-dépositaire",
+    feature3: "✓ Staking 14% APY",
+    feature4: "✓ Programme Airdrop & Fidélité",
+    feature5: "✓ Trésorerie caritative (taxe 2%)",
+    whitepaper_motto: '"Pour cette génération et la suivante — avec amour, nous bâtissons la bonne nation."',
+    footer_text: "Décentralisé pour l'humanité. Aucune vente de données. Vos clés, votre vie."
+  },
+  es: {
+    app_name: "Billetera EFC",
+    connect_btn: "Conectar",
+    not_connected: "No conectado",
+    hero_title1: "LA MONEDA ES VIDA",
+    hero_title2: "LA VIDA ES MONEDA",
+    hero_desc: "Con amor construimos la buena nación. Pague matrículas escolares, compre alimentos, compre globalmente con Efikcoin EFC. Billetera autónoma, recompensas por staking, empoderamiento caritativo — para esta generación y la próxima.",
+    create_wallet_btn: "Crear billetera",
+    import_wallet_btn: "Importar billetera",
+    price_label: "Precio EFC",
+    holders_label: "Tenedores",
+    apy_label: "APY de Staking",
+    global_label: "Acceso global",
+    wallet_title: "Mi Billetera",
+    download_btn: "Instalar App",
+    total_balance: "Saldo total (USD)",
+    efc_balance: "EFC:",
+    native_balance: "BNB/ETH:",
+    send_btn: "Enviar",
+    receive_btn: "Recibir",
+    add_token_btn: "Añadir token",
+    address_label: "Dirección:",
+    chart_label: "Portafolio",
+    staking_tab: "Staking",
+    p2p_tab: "P2P",
+    history_tab: "Historial",
+    staking_title: "Staking",
+    staked_label: "Su stake:",
+    pending_label: "Recompensas pendientes:",
+    total_pool_label: "Pool total:",
+    stake_btn: "Hacer stake",
+    unstake_btn: "Retirar stake",
+    claim_btn: "Reclamar recompensas",
+    p2p_title: "Comercio P2P",
+    p2p_desc: "Compre o venda EFC con otros usuarios (ofertas locales).",
+    buy_option: "Comprar",
+    sell_option: "Vender",
+    create_offer_btn: "Crear oferta",
+    history_title: "Transacciones",
+    no_history: "Sin transacciones.",
+    charity_title: "Empoderamiento caritativo",
+    charity_desc: "Efikcoin dona el 2% de la tesorería a educación, ayuda contra el hambre y proyectos de agua potable. Con amor construimos la buena nación.",
+    charity_stat1: "100+ útiles escolares",
+    charity_stat2: "20,000 comidas financiadas",
+    charity_stat3: "Pozos de agua en África",
+    charity_link1: "Portal oficial",
+    charity_link2: "Sitio espejo",
+    whitepaper_title: "Libro blanco de Efikcoin – La moneda es vida",
+    network_label: "Red:",
+    contract_label: "Contrato:",
+    treasury_label: "Tesorería:",
+    lp_label: "LP Pair V2:",
+    feature1: "✓ Pagos reales (Educación, Alimentación, Compras)",
+    feature2: "✓ Billetera autónoma",
+    feature3: "✓ Staking 14% APY",
+    feature4: "✓ Programa Airdrop y Lealtad",
+    feature5: "✓ Tesorería caritativa (2% de impuesto)",
+    whitepaper_motto: '"Para esta generación y la próxima — con amor construimos la buena nación."',
+    footer_text: "Descentralizado para la humanidad. Sin venta de datos. Sus llaves, su vida."
+  },
+  pt: {
+    app_name: "Carteira EFC",
+    connect_btn: "Conectar",
+    not_connected: "Não conectado",
+    hero_title1: "A MOEDA É VIDA",
+    hero_title2: "A VIDA É MOEDA",
+    hero_desc: "Com amor construímos a boa nação. Pague taxas escolares, compre comida, faça compras globalmente com Efikcoin EFC. Carteira auto-custodiada, recompensas de staking, empoderamento caritativo — para esta geração e a próxima.",
+    create_wallet_btn: "Criar carteira",
+    import_wallet_btn: "Importar carteira",
+    price_label: "Preço EFC",
+    holders_label: "Detentores",
+    apy_label: "APY de Staking",
+    global_label: "Acesso global",
+    wallet_title: "Minha Carteira",
+    download_btn: "Instalar App",
+    total_balance: "Saldo total (USD)",
+    efc_balance: "EFC:",
+    native_balance: "BNB/ETH:",
+    send_btn: "Enviar",
+    receive_btn: "Receber",
+    add_token_btn: "Adicionar token",
+    address_label: "Endereço:",
+    chart_label: "Portfólio",
+    staking_tab: "Staking",
+    p2p_tab: "P2P",
+    history_tab: "Histórico",
+    staking_title: "Staking",
+    staked_label: "Seu stake:",
+    pending_label: "Recompensas pendentes:",
+    total_pool_label: "Pool total:",
+    stake_btn: "Fazer stake",
+    unstake_btn: "Retirar stake",
+    claim_btn: "Reivindicar recompensas",
+    p2p_title: "Comércio P2P",
+    p2p_desc: "Compre ou venda EFC com outros usuários (ofertas locais).",
+    buy_option: "Comprar",
+    sell_option: "Vender",
+    create_offer_btn: "Criar oferta",
+    history_title: "Transações",
+    no_history: "Nenhuma transação.",
+    charity_title: "Empoderamento caritativo",
+    charity_desc: "Efikcoin doa 2% do tesouro para educação, combate à fome e projetos de água potável. Com amor construímos a boa nação.",
+    charity_stat1: "100+ materiais escolares",
+    charity_stat2: "20.000 refeições financiadas",
+    charity_stat3: "Poços de água na África",
+    charity_link1: "Portal oficial",
+    charity_link2: "Site espelho",
+    whitepaper_title: "Livro branco Efikcoin – A moeda é vida",
+    network_label: "Rede:",
+    contract_label: "Contrato:",
+    treasury_label: "Tesouro:",
+    lp_label: "LP Pair V2:",
+    feature1: "✓ Pagamentos reais (Educação, Alimentação, Compras)",
+    feature2: "✓ Carteira auto-custodiada",
+    feature3: "✓ Staking 14% APY",
+    feature4: "✓ Programa Airdrop e Fidelidade",
+    feature5: "✓ Tesouro caritativo (2% de imposto)",
+    whitepaper_motto: '"Para esta geração e a próxima — com amor construímos a boa nação."',
+    footer_text: "Descentralizado para a humanidade. Sem venda de dados. Suas chaves, sua vida."
+  },
+  zh: {
+    app_name: "EFC 钱包",
+    connect_btn: "连接",
+    not_connected: "未连接",
+    hero_title1: "币即生命",
+    hero_title2: "生命即币",
+    hero_desc: "以爱建善国。用 Efikcoin EFC 支付学费、购买食品、全球购物。自托管钱包、质押奖励、慈善赋能——为今世后代。",
+    create_wallet_btn: "创建钱包",
+    import_wallet_btn: "导入钱包",
+    price_label: "EFC 价格",
+    holders_label: "持有者",
+    apy_label: "质押年化",
+    global_label: "全球访问",
+    wallet_title: "我的钱包",
+    download_btn: "安装应用",
+    total_balance: "总余额 (美元)",
+    efc_balance: "EFC:",
+    native_balance: "BNB/ETH:",
+    send_btn: "发送",
+    receive_btn: "接收",
+    add_token_btn: "添加代币",
+    address_label: "地址:",
+    chart_label: "资产组合",
+    staking_tab: "质押",
+    p2p_tab: "P2P",
+    history_tab: "历史",
+    staking_title: "质押",
+    staked_label: "您的质押:",
+    pending_label: "待领奖励:",
+    total_pool_label: "总池:",
+    stake_btn: "质押",
+    unstake_btn: "解除质押",
+    claim_btn: "领取奖励",
+    p2p_title: "P2P 交易",
+    p2p_desc: "与其他用户买卖 EFC (本地挂单)。",
+    buy_option: "买入",
+    sell_option: "卖出",
+    create_offer_btn: "创建挂单",
+    history_title: "交易记录",
+    no_history: "暂无交易。",
+    charity_title: "慈善赋能",
+    charity_desc: "Efikcoin 将金库的 2% 捐赠给教育、饥饿救助和清洁水项目。以爱建善国。",
+    charity_stat1: "100+ 份学习用品",
+    charity_stat2: "20,000 餐资助",
+    charity_stat3: "非洲水井",
+    charity_link1: "官方门户",
+    charity_link2: "镜像站点",
+    whitepaper_title: "Efikcoin 白皮书 – 币即生命",
+    network_label: "网络:",
+    contract_label: "合约:",
+    treasury_label: "金库:",
+    lp_label: "LP Pair V2:",
+    feature1: "✓ 现实支付 (教育、食品、购物)",
+    feature2: "✓ 自托管钱包",
+    feature3: "✓ 质押年化 14%",
+    feature4: "✓ 空投与忠诚计划",
+    feature5: "✓ 慈善金库 (2% 税)",
+    whitepaper_motto: '"为今世后代——以爱建善国。"',
+    footer_text: "为人类去中心化。不出售数据。您的密钥，您的生活。"
+  }
+};
+
+let currentLang = 'en';
+function setLanguage(lang) {
+  if (!i18n[lang]) lang = 'en';
+  currentLang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[lang] && i18n[lang][key]) {
+      el.innerText = i18n[lang][key];
+    } else if (i18n['en'] && i18n['en'][key]) {
+      el.innerText = i18n['en'][key];
+    }
+  });
+  localStorage.setItem('preferred_lang', lang);
+}
+function detectAndSetLanguage() {
+  const browserLang = navigator.language.split('-')[0];
+  const supported = ['en','fr','es','pt','zh'];
+  const saved = localStorage.getItem('preferred_lang');
+  if (saved && supported.includes(saved)) setLanguage(saved);
+  else if (supported.includes(browserLang)) setLanguage(browserLang);
+  else setLanguage('en');
+}
+document.querySelectorAll('.lang-selector').forEach(el => {
+  el.addEventListener('click', () => {
+    const langs = ['en','fr','es','pt','zh'];
+    let idx = langs.indexOf(currentLang);
+    idx = (idx + 1) % langs.length;
+    setLanguage(langs[idx]);
+  });
+});
+detectAndSetLanguage();
+
+// ====================== BLOCKCHAIN CORE ======================
+let provider, signer, userAddress, tokenContract;
+let efcDecimals = 18;
+let currentChain = 56;
+let isConnected = false;
+
+const $ = id => document.getElementById(id);
+const toastMsg = $('toastMsg');
+const toast = $('toast');
+const modalOverlay = $('modalOverlay');
+const modalContent = $('modalContent');
+
+function showToast(text, isError=false) {
+  toastMsg.innerText = text;
+  toast.style.borderLeftColor = isError ? '#ef4444' : '#3b82f6';
+  toast.style.display = 'flex';
+  setTimeout(() => toast.style.display = 'none', 5000);
+}
+
+function openModal(html) { modalContent.innerHTML = html; modalOverlay.style.display = 'flex'; }
+function closeModal() { modalOverlay.style.display = 'none'; }
+modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
+
+async function connectWallet() {
+  const providerOptions = {};
+  const web3Modal = new Web3Modal.default({ cacheProvider: false, providerOptions, theme: 'dark' });
+  try {
+    const web3Provider = await web3Modal.connect();
+    const ethersProvider = new ethers.providers.Web3Provider(web3Provider);
+    const network = await ethersProvider.getNetwork();
+    if (network.chainId !== currentChain) {
+      try {
+        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x' + currentChain.toString(16) }] });
+      } catch(e) {
+        showToast('Please switch to '+ (currentChain===56?'BNB Smart Chain':'Ethereum'), true);
+        return;
+      }
+    }
+    signer = ethersProvider.getSigner();
+    provider = ethersProvider;
+    userAddress = await signer.getAddress();
+    tokenContract = new ethers.Contract(TOKEN_ADDRESS, EFC_ABI, signer);
+    $('walletAddress').innerText = userAddress;
+    $('walletStatus').innerText = userAddress.slice(0,6)+'...'+userAddress.slice(-4);
+    $('connectBtn').innerHTML = '<i class="fas fa-check-circle"></i> Connected';
+    $('connectBtn').disabled = true;
+    isConnected = true;
+    await loadBalances();
+    await loadStaking();
+    loadHistory();
+    // fetch price
+    fetchEFCPrice();
+    web3Provider.on('accountsChanged', (acc) => { if(acc.length===0) location.reload(); else location.reload(); });
+  } catch(err) { showToast('Connection failed: '+err.message, true); }
+}
+
+async function loadBalances() {
+  if (!tokenContract || !userAddress) return;
+  try {
+    const efcBal = await tokenContract.balanceOf(userAddress);
+    const nativeBal = await provider.getBalance(userAddress);
+    const dec = await tokenContract.decimals();
+    efcDecimals = dec;
+    const efcFormatted = ethers.utils.formatUnits(efcBal, dec);
+    const nativeFormatted = ethers.utils.formatEther(nativeBal);
+    $('efcBalance').innerText = parseFloat(efcFormatted).toFixed(4);
+    $('nativeBalance').innerText = parseFloat(nativeFormatted).toFixed(5) + ' ' + (currentChain===56?'BNB':'ETH');
+    // mock price ~0.005
+    const price = 0.005;
+    const total = parseFloat(efcFormatted)*price + parseFloat(nativeFormatted)*300;
+    $('totalBalance').innerText = '$'+total.toFixed(2);
+  } catch(e) { console.warn(e); }
+}
+
+async function loadStaking() {
+  if (!tokenContract || !userAddress) return;
+  try {
+    const staked = await tokenContract.staked(userAddress);
+    const reward = await tokenContract.pendingReward(userAddress);
+    const total = await tokenContract.totalStaked();
+    $('stakedAmount').innerText = ethers.utils.formatUnits(staked, efcDecimals).slice(0,8)+' EFC';
+    $('pendingReward').innerText = ethers.utils.formatUnits(reward, efcDecimals).slice(0,8)+' EFC';
+    $('totalPool').innerText = ethers.utils.formatUnits(total, efcDecimals).slice(0,10)+' EFC';
+  } catch(e) { console.warn(e); }
+}
+
+async function fetchEFCPrice() {
+  try {
+    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_ADDRESS}`);
+    const data = await res.json();
+    if (data.pairs && data.pairs[0]) {
+      $('efcPrice').innerText = '$'+parseFloat(data.pairs[0].priceUsd).toFixed(8);
+    } else {
+      $('efcPrice').innerText = '$0.0045';
+    }
+  } catch(e) { $('efcPrice').innerText = '$0.0045'; }
+}
+
+// ========== ACTIONS ==========
+$('connectBtn').onclick = connectWallet;
+$('refreshBtn').onclick = () => { if(isConnected) { loadBalances(); loadStaking(); loadHistory(); showToast('Refreshed'); } };
+
+$('createWalletBtn').onclick = () => {
+  const wallet = ethers.Wallet.createRandom();
+  const mnemonic = wallet.mnemonic.phrase;
+  const privateKey = wallet.privateKey;
+  const address = wallet.address;
+  openModal(`
+    <h3 class="text-xl font-bold mb-2">New Wallet Created</h3>
+    <p><strong>Address:</strong> ${address}</p>
+    <p><strong>Recovery Phrase (12 words):</strong></p>
+    <div class="bg-gray-800 p-2 rounded-xl font-mono text-sm break-words">${mnemonic}</div>
+    <p><strong>Private Key:</strong> <span class="font-mono text-xs break-all">${privateKey}</span></p>
+    <p class="text-red-400 text-sm mt-2">⚠️ Save these securely! Never share them.</p>
+    <button onclick="closeModal()" class="btn-primary mt-2">I saved it</button>
+  `);
+};
+
+$('importWalletBtn').onclick = () => {
+  openModal(`
+    <h3 class="text-xl font-bold mb-2">Import Wallet</h3>
+    <p class="text-sm">Enter your private key (starts with 0x)</p>
+    <input type="text" id="importPrivateKey" placeholder="Private key" class="input-field mb-2">
+    <button id="importConfirm" class="btn-primary">Import</button>
+    <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+  `);
+  $('importConfirm').onclick = async () => {
+    const pk = $('importPrivateKey').value.trim();
+    if (!pk || !pk.startsWith('0x')) return showToast('Invalid private key', true);
+    try {
+      const wallet = new ethers.Wallet(pk, provider);
+      userAddress = wallet.address;
+      signer = wallet.connect(provider);
+      tokenContract = new ethers.Contract(TOKEN_ADDRESS, EFC_ABI, signer);
+      $('walletAddress').innerText = userAddress;
+      $('walletStatus').innerText = userAddress.slice(0,6)+'...'+userAddress.slice(-4);
+      $('connectBtn').innerHTML = '<i class="fas fa-check-circle"></i> Imported';
+      $('connectBtn').disabled = true;
+      isConnected = true;
+      await loadBalances();
+      await loadStaking();
+      loadHistory();
+      closeModal();
+      showToast('Wallet imported!');
+    } catch(e) { showToast('Import failed: '+e.message, true); }
+  };
+};
+
+$('sendBtn').onclick = () => {
+  if (!isConnected) return showToast('Connect wallet first', true);
+  openModal(`
+    <h3 class="text-xl font-bold mb-2">Send EFC</h3>
+    <input type="text" id="sendTo" placeholder="Recipient address" class="input-field mb-2">
+    <input type="number" id="sendAmount" placeholder="Amount" class="input-field mb-2">
+    <div class="flex gap-2">
+      <button id="confirmSend" class="btn-primary">Send</button>
+      <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+    </div>
+  `);
+  $('confirmSend').onclick = async () => {
+    const to = $('sendTo').value;
+    const amt = $('sendAmount').value;
+    if (!ethers.utils.isAddress(to)) return showToast('Invalid address', true);
+    if (!amt || parseFloat(amt)<=0) return showToast('Invalid amount', true);
+    try {
+      const parsed = ethers.utils.parseUnits(amt, efcDecimals);
+      const tx = await tokenContract.transfer(to, parsed);
+      showToast('Sending...');
+      await tx.wait();
+      showToast('Sent!');
+      closeModal();
+      loadBalances();
+      addHistory('Send', amt+' EFC to '+to.slice(0,6)+'...');
+    } catch(e) { showToast('Send failed: '+e.message.slice(0,80), true); }
+  };
+};
+
+$('receiveBtn').onclick = () => {
+  if (!isConnected) return showToast('Connect wallet', true);
+  openModal(`
+    <h3 class="text-xl font-bold mb-2">Receive</h3>
+    <p class="text-sm">Your address:</p>
+    <div class="font-mono text-xs break-all bg-gray-800 p-2 rounded-xl">${userAddress}</div>
+    <div id="qrContainer" class="mt-2"></div>
+    <button onclick="closeModal()" class="btn-secondary mt-3">Close</button>
+  `);
+  new QRCode(document.getElementById('qrContainer'), { text: userAddress, width: 200, height: 200 });
+};
+
+$('addTokenBtn').onclick = async () => {
+  if (!window.ethereum) return showToast('Install MetaMask', true);
+  try {
+    await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: TOKEN_ADDRESS, symbol: 'EFC', decimals: efcDecimals } } });
+    showToast('Token added!');
+  } catch(e) {}
+};
+
+// Staking
+$('stakeBtn').onclick = async () => {
+  if (!isConnected) return showToast('Connect first', true);
+  const amt = $('stakeInput').value;
+  if (!amt || parseFloat(amt)<=0) return showToast('Enter amount', true);
+  try {
+    const parsed = ethers.utils.parseUnits(amt, efcDecimals);
+    const approve = await tokenContract.approve(TOKEN_ADDRESS, parsed);
+    await approve.wait();
+    const tx = await tokenContract.deposit(parsed);
+    showToast('Staking...');
+    await tx.wait();
+    showToast('Staked!');
+    loadBalances(); loadStaking();
+  } catch(e) { showToast('Stake failed: '+e.message.slice(0,80), true); }
+};
+$('unstakeBtn').onclick = async () => {
+  if (!isConnected) return showToast('Connect first', true);
+  const amt = $('stakeInput').value;
+  if (!amt) return showToast('Enter amount', true);
+  try {
+    const parsed = ethers.utils.parseUnits(amt, efcDecimals);
+    const tx = await tokenContract.withdraw(parsed);
+    showToast('Unstaking...');
+    await tx.wait();
+    showToast('Unstaked!');
+    loadBalances(); loadStaking();
+  } catch(e) { showToast('Unstake failed', true); }
+};
+$('claimRewardBtn').onclick = async () => {
+  if (!isConnected) return showToast('Connect first', true);
+  try {
+    const tx = await tokenContract.claimRewards();
+    showToast('Claiming...');
+    await tx.wait();
+    showToast('Rewards claimed!');
+    loadStaking();
+  } catch(e) { showToast('Claim failed', true); }
+};
+
+// P2P
+function loadP2P() {
+  const offers = JSON.parse(localStorage.getItem('efc_p2p_offers') || '[]');
+  if (offers.length === 0) { $('p2pOffers').innerHTML = '<p class="text-gray-400">No offers. Create one!</p>'; return; }
+  $('p2pOffers').innerHTML = offers.map(o => `
+    <div class="p2p-offer flex-between">
+      <span><strong>${o.type}</strong> ${o.amount} EFC @ ${o.price} USDT</span>
+      <span class="text-sm text-gray-400">by ${o.address.slice(0,6)}...</span>
+    </div>
+  `).join('');
+}
+$('p2pCreateBtn').onclick = () => {
+  if (!isConnected) return showToast('Connect first', true);
+  const amount = $('p2pAmount').value;
+  const price = $('p2pPrice').value;
+  const type = $('p2pType').value;
+  if (!amount || !price) return showToast('Fill all fields', true);
+  const offers = JSON.parse(localStorage.getItem('efc_p2p_offers') || '[]');
+  offers.push({ type, amount, price, address: userAddress, time: Date.now() });
+  localStorage.setItem('efc_p2p_offers', JSON.stringify(offers));
+  showToast('Offer created!');
+  loadP2P();
+};
+
+// History
+function addHistory(type, detail) {
+  const hist = JSON.parse(localStorage.getItem('efc_history') || '[]');
+  hist.unshift({ type, detail, time: new Date().toLocaleString() });
+  if (hist.length > 50) hist = hist.slice(0,50);
+  localStorage.setItem('efc_history', JSON.stringify(hist));
+  loadHistory();
+}
+function loadHistory() {
+  const hist = JSON.parse(localStorage.getItem('efc_history') || '[]');
+  if (hist.length === 0) { $('historyList').innerHTML = '<p class="text-gray-400">No transactions yet.</p>'; return; }
+  $('historyList').innerHTML = hist.map(h => `<div class="flex-between border-b border-gray-700 py-1 text-sm"><span>${h.type}</span><span>${h.detail}</span><span class="text-gray-500">${h.time}</span></div>`).join('');
+}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.tab;
+    document.getElementById('stakingTab').classList.toggle('hidden', target !== 'staking');
+    document.getElementById('p2pTab').classList.toggle('hidden', target !== 'p2p');
+    document.getElementById('historyTab').classList.toggle('hidden', target !== 'history');
+    if (target === 'p2p') loadP2P();
+    if (target === 'history') loadHistory();
+  };
+});
+
+// Network switch
+$('networkSelect').onchange = async () => {
+  currentChain = parseInt($('networkSelect').value);
+  if (window.ethereum) {
+    try {
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x' + currentChain.toString(16) }] });
+      location.reload();
+    } catch(e) { showToast('Network switch failed', true); }
+  }
+};
+
+// PWA Install
+$('downloadAppBtn').onclick = () => {
+  if (window.navigator && window.navigator.serviceWorker) {
+    // Simple prompt: show install instructions
+    openModal(`
+      <h3 class="text-xl font-bold mb-2">Install EFC Wallet</h3>
+      <p class="text-sm">On Android/iPhone: Open this page in Chrome/Safari, tap the share icon, then "Add to Home Screen".</p>
+      <button onclick="closeModal()" class="btn-primary mt-2">Got it</button>
+    `);
+  }
+};
+
+// Auto-load data if already connected
+window.onload = function() {
+  if (window.ethereum && window.ethereum.selectedAddress) {
+    connectWallet();
+  }
+  loadP2P();
+  loadHistory();
+  fetchEFCPrice();
+  setInterval(fetchEFCPrice, 30000);
+  // Charity background rotation
+  const images = ["https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200", "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=1200", "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200"];
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx + 1) % images.length;
+    document.getElementById('charityBg').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5)), url('${images[idx]}')`;
+  }, 8000);
+  // Register service worker for PWA (optional)
+  if ('serviceWorker' in navigator) {
+    // Since we are a single file, we can register a dummy service worker from a blob URL
+    const swCode = `self.addEventListener('install', e => e.waitUntil(skipWaiting())); self.addEventListener('activate', e => e.waitUntil(clients.claim()));`;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  }
+};
+</script>
+</body>
+</html>
