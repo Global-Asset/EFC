@@ -5,19 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <meta name="theme-color" content="#0a0c12">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>EFC Wallet – Multi‑Chain Self‑Custodial</title>
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.11/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bitcoinjs-lib@5.2.0/dist/bitcoinjs-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bip32@2.0.6/dist/bip32.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
     body { background:#0a0c12; color:#eef2ff; display:flex; min-height:100vh; }
-    /* Sidebar */
-    .sidebar { width: 72px; background:rgba(15,23,42,0.9); backdrop-filter:blur(20px); border-right:1px solid #1e293b; display:flex; flex-direction:column; align-items:center; padding:1rem 0; position:fixed; top:0; left:0; height:100%; z-index:100; }
+    .sidebar { width:72px; background:rgba(15,23,42,0.9); backdrop-filter:blur(20px); border-right:1px solid #1e293b; display:flex; flex-direction:column; align-items:center; padding:1rem 0; position:fixed; top:0; left:0; height:100%; z-index:100; }
     .sidebar .logo { font-size:1.8rem; margin-bottom:2rem; }
     .sidebar .nav-item { padding:0.8rem; border-radius:1rem; margin:0.2rem 0; transition:0.2s; cursor:pointer; color:#94a3b8; width:100%; text-align:center; }
     .sidebar .nav-item:hover, .sidebar .nav-item.active { background:#1e293b; color:#8b5cf6; }
@@ -36,7 +38,6 @@
     .toast { position:fixed; bottom:20px; right:20px; background:#1e293b; border-left:4px solid #3b82f6; padding:0.8rem 1.5rem; border-radius:1rem; z-index:9999; display:none; align-items:center; gap:0.8rem; box-shadow:0 10px 25px #00000055; }
     .modal-overlay { display:none; position:fixed; inset:0; background:#000000aa; backdrop-filter:blur(8px); z-index:10000; align-items:center; justify-content:center; }
     .modal-box { background:#0f172a; padding:2rem; border-radius:2rem; max-width:500px; width:90%; border:1px solid #8b5cf6; max-height:80vh; overflow-y:auto; }
-    .coin-icon { width:32px; height:32px; border-radius:50%; background:#1e293b; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem; }
     .coin-row { display:flex; align-items:center; gap:0.8rem; padding:0.6rem 0; border-bottom:1px solid #1e293b; }
     .tab { padding:0.5rem 1rem; border-radius:2rem; background:#1e293b; cursor:pointer; font-weight:600; transition:0.2s; display:inline-block; }
     .tab.active { background:#8b5cf6; }
@@ -56,7 +57,7 @@
 </div>
 
 <!-- Main -->
-<div class="main">
+<div class="main" id="mainContent">
   <!-- Header -->
   <div class="flex-between mb-4">
     <h2><span id="walletName">EFC Wallet</span> <span class="badge">v2</span></h2>
@@ -73,9 +74,7 @@
       <div class="glass">
         <p class="text-sm text-gray-400">Total Portfolio Value</p>
         <p id="totalBalance" class="text-3xl font-bold">$0.00</p>
-        <div id="chainBalances" class="mt-3">
-          <!-- dynamically filled -->
-        </div>
+        <div id="chainBalances" class="mt-3"></div>
       </div>
       <div class="glass">
         <h3><i class="fas fa-chart-pie"></i> Asset Allocation</h3>
@@ -92,10 +91,10 @@
     </div>
   </div>
 
-  <!-- Wallet Section (Balances per chain) -->
+  <!-- Wallet Section -->
   <div id="section-wallet" class="section hidden">
     <div class="glass">
-      <h3>🔗 Your Wallet Addresses</h3>
+      <h3>🔗 Your Addresses</h3>
       <div id="addressList" class="mt-2"></div>
     </div>
     <div class="glass mt-4">
@@ -120,11 +119,11 @@
     </div>
   </div>
 
-  <!-- Settings Section -->
+  <!-- Settings -->
   <div id="section-settings" class="section hidden">
     <div class="glass">
       <h3>⚙️ Settings</h3>
-      <p>Create a new wallet or import existing one.</p>
+      <p>Create a new wallet or import an existing one.</p>
       <div class="flex gap-2 mt-2">
         <button id="createWalletBtn" class="btn-primary"><i class="fas fa-plus"></i> New Wallet</button>
         <button id="importWalletBtn" class="btn-secondary"><i class="fas fa-key"></i> Import</button>
@@ -140,7 +139,7 @@
 <div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalContent"></div></div>
 
 <script>
-// ====================== CONFIGURATION ======================
+// ====================== CONFIG ======================
 const EFC_ADDRESS = "0x677ce9cba67f7484ea951a12897ce780cfd8fed1";
 const EFC_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -156,6 +155,8 @@ const EFC_ABI = [
   "function claimRewards()",
   "function APY() view returns (uint256)"
 ];
+const USDT_BSC = "0x55d398326f99059fF775485246999027B3197955";
+const USDT_ETH = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 const CHAINS = {
   bsc: { name:'BNB Chain', symbol:'BNB', chainId:56, rpc:'https://bsc-dataseed.binance.org/', explorer:'https://bscscan.com', icon:'🔵' },
   eth: { name:'Ethereum', symbol:'ETH', chainId:1, rpc:'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161', explorer:'https://etherscan.io', icon:'⚡' },
@@ -164,14 +165,13 @@ const CHAINS = {
 const BTC_API = 'https://blockchain.info/balance?active=';
 
 // ====================== STATE ======================
-let walletData = null; // { mnemonic, privateKey?, address, encrypted? }
+let walletData = null; // { mnemonic, address, privateKey? }
 let currentAddress = null;
-let balances = { bsc: { native:0, efc:0, usdt:0 }, eth: { native:0, usdt:0 }, polygon: { native:0, usdt:0 }, btc:0 };
-let provider = null;
-let signer = null;
-let tokenContract = null;
+let balances = { bsc:{native:0, efc:0, usdt:0}, eth:{native:0, usdt:0}, polygon:{native:0, usdt:0}, btc:0 };
+let provider = null, signer = null, tokenContract = null;
 let isUnlocked = false;
 let chartInstance = null;
+let currentChain = 'bsc';
 
 // ====================== HELPERS ======================
 const $ = id => document.getElementById(id);
@@ -186,117 +186,363 @@ function showToast(text, isError=false) {
   toast.style.display = 'flex';
   setTimeout(() => toast.style.display = 'none', 5000);
 }
-
 function openModal(html) { modalContent.innerHTML = html; modalOverlay.style.display = 'flex'; }
 function closeModal() { modalOverlay.style.display = 'none'; }
 modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
 
-// ====================== WALLET CORE (Password Protected) ======================
-// We'll store encrypted seed in localStorage. Use Web Crypto API to encrypt/decrypt.
-// For simplicity, we use a simple base64 encoding + password hash (not secure but quick).
-// For production, use a proper encryption library. But here we do a simple XOR for demonstration.
-// Actually, we'll use a simple encryption using CryptoJS? We can't include extra libs.
-// We'll use a custom simple encryption: XOR with password hash.
-// Better: we'll store the mnemonic in sessionStorage while unlocked, and keep it encrypted in localStorage.
-// We'll implement a basic AES-like using built-in SubtleCrypto? Too complex.
-// I'll do a simple approach: store mnemonic in localStorage encrypted with a simple XOR with password (not secure for production but fine for demo).
-// For a real wallet, use a library like 'crypto-js'. But we want a single file.
-// Let's use a simple encoding: we'll store the mnemonic as base64, and when unlocking, we decrypt with password.
-// We'll use a simple hash function (SHA-256) to derive key, then XOR.
-// Since we can't do async easily, we'll use a simpler method: store the mnemonic in sessionStorage (cleared on tab close) and when user locks, we clear it.
-// Actually, the best practice: store encrypted mnemonic in localStorage, and when user enters password, we decrypt and store in sessionStorage.
-// I'll implement a simple encryption using built-in crypto.subtle (async). But to keep it simple for now, I'll use a basic XOR with password hash.
-// I'll use a simple function: encrypt(text, password) => base64 of (text XOR repeated key). Not secure, but functional.
-// We'll later upgrade if needed.
-// Since the user wants a working wallet now, I'll implement a basic password protection.
-
-function hashPassword(password) {
-  let hash = 0;
-  for (let i=0; i<password.length; i++) {
-    hash = ((hash << 5) - hash) + password.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash;
+// Simple encryption/decryption (XOR with password hash) – for demo
+function hashPassword(pw) { let h=0; for(let i=0;i<pw.length;i++){ h=((h<<5)-h)+pw.charCodeAt(i); h|=0; } return h.toString(); }
+function encryptMnemonic(mnemonic, pw) {
+  const key = hashPassword(pw);
+  let res=''; for(let i=0;i<mnemonic.length;i++){ res+=String.fromCharCode(mnemonic.charCodeAt(i) ^ key.charCodeAt(i%key.length)); } return btoa(res);
+}
+function decryptMnemonic(enc, pw) {
+  const key = hashPassword(pw);
+  const data = atob(enc);
+  let res=''; for(let i=0;i<data.length;i++){ res+=String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i%key.length)); } return res;
 }
 
-function encryptMnemonic(mnemonic, password) {
-  const key = hashPassword(password).toString();
-  let result = '';
-  for (let i=0; i<mnemonic.length; i++) {
-    const charCode = mnemonic.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-    result += String.fromCharCode(charCode);
-  }
-  return btoa(result);
-}
-
-function decryptMnemonic(encrypted, password) {
-  const key = hashPassword(password).toString();
-  const data = atob(encrypted);
-  let result = '';
-  for (let i=0; i<data.length; i++) {
-    const charCode = data.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-    result += String.fromCharCode(charCode);
-  }
-  return result;
-}
-
-// ====================== WALLET CREATION ======================
+// ====================== WALLET CREATION & UNLOCK ======================
 function createNewWallet(password) {
   const wallet = ethers.Wallet.createRandom();
   const mnemonic = wallet.mnemonic.phrase;
-  const privateKey = wallet.privateKey;
   const address = wallet.address;
-  // Encrypt mnemonic with password
   const encrypted = encryptMnemonic(mnemonic, password);
   localStorage.setItem('efc_wallet_encrypted', encrypted);
   localStorage.setItem('efc_wallet_address', address);
-  // Store private key separately? We can derive from mnemonic.
-  // We'll store the mnemonic encrypted.
-  return { mnemonic, privateKey, address };
+  return { mnemonic, address, privateKey: wallet.privateKey };
 }
-
 function unlockWallet(password) {
-  const encrypted = localStorage.getItem('efc_wallet_encrypted');
-  if (!encrypted) return null;
+  const enc = localStorage.getItem('efc_wallet_encrypted');
+  if (!enc) return null;
   try {
-    const mnemonic = decryptMnemonic(encrypted, password);
-    // Verify it's a valid mnemonic (simple check)
+    const mnemonic = decryptMnemonic(enc, password);
     if (!mnemonic || mnemonic.split(' ').length < 12) return null;
-    // Derive HD wallet
     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-    return { mnemonic, privateKey: wallet.privateKey, address: wallet.address };
+    return { mnemonic, address: wallet.address, privateKey: wallet.privateKey };
   } catch(e) { return null; }
 }
 
-// ====================== DERIVE ADDRESSES FOR CHAINS ======================
-function deriveAddresses(mnemonic) {
-  // For EVM chains, we use same private key (ethers)
-  const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-  const ethAddress = wallet.address;
-  // For Bitcoin, we need to derive a different path (m/44'/0'/0'/0/0)
-  // We'll use a simple external lib? For now, we'll use a placeholder.
-  // Since we can't include bitcoinjs-lib easily, we'll generate a BTC address using an API? 
-  // Or we can just show a placeholder BTC address derived from the same mnemonic using a simple method?
-  // To keep it simple, we'll use a public API to get BTC balance, but we need an address.
-  // We can derive BTC address using bip32 with ethers? Not directly.
-  // I'll use a simple approach: use the same address for all EVM chains (they are same on all EVM chains).
-  // For BTC, we'll generate a legacy address from the same private key using a library? Not possible without bitcoinjs.
-  // We'll use a fallback: we'll generate a BTC address from the same mnemonic using a third-party API? 
-  // For now, I'll note that we need a separate method. I'll use a workaround: we can use the Ethereum address as a BTC address (not correct).
-  // But the user wants a real BTC address. I'll implement a quick derivation using a simple algorithm?
-  // Actually, we can use the `bitcoin` library via CDN? We can add it: <script src="https://cdn.jsdelivr.net/npm/bitcoinjs-lib@5.2.0/dist/bitcoinjs-lib.min.js"></script>
-  // I'll add it now.
-  // Since we are building a single file, I'll include it via CDN.
-  // I'll add the script tag in the head.
-  // For now, I'll simulate.
-  // To be thorough, I'll include bitcoinjs-lib via CDN and derive a proper segwit address.
-  // I'll add the script tag now. Let's modify the head.
-  // I'll add: <script src="https://cdn.jsdelivr.net/npm/bitcoinjs-lib@5.2.0/dist/bitcoinjs-lib.min.js"></script>
-  // and <script src="https://cdn.jsdelivr.net/npm/bip32@2.0.6/dist/bip32.min.js"></script>
-  // I'll include them now.
-  // For simplicity, I'll add them in the final code.
-  // Let's create a complete solution.
-  // I'll proceed to write the full code in the answer.
+// ====================== DERIVE BITCOIN ADDRESS ======================
+function deriveBTCAddress(mnemonic) {
+  // Use bip32 with bitcoinjs-lib
+  const seed = bip32.fromSeed(Buffer.from(ethers.Wallet.fromMnemonic(mnemonic).mnemonic.entropy, 'hex'));
+  // m/84'/0'/0'/0/0 (segwit)
+  const path = "m/84'/0'/0'/0/0";
+  const node = seed.derivePath(path);
+  const { address } = bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network: bitcoin.networks.bitcoin });
+  return address;
+}
+
+// ====================== LOAD BALANCES ======================
+async function loadBalances() {
+  if (!walletData) return;
+  const addr = walletData.address;
+  // EVM chains
+  const bscProvider = new ethers.providers.JsonRpcProvider(CHAINS.bsc.rpc);
+  const ethProvider = new ethers.providers.JsonRpcProvider(CHAINS.eth.rpc);
+  const polygonProvider = new ethers.providers.JsonRpcProvider(CHAINS.polygon.rpc);
+  
+  try {
+    // BSC
+    const bscNative = await bscProvider.getBalance(addr);
+    const efcContract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, bscProvider);
+    const efcBal = await efcContract.balanceOf(addr);
+    const usdtBSC = new ethers.Contract(USDT_BSC, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], bscProvider);
+    const usdtBSCBal = await usdtBSC.balanceOf(addr);
+    const usdtBSCDec = await usdtBSC.decimals();
+    balances.bsc = { native: parseFloat(ethers.utils.formatEther(bscNative)), efc: parseFloat(ethers.utils.formatUnits(efcBal, 18)), usdt: parseFloat(ethers.utils.formatUnits(usdtBSCBal, usdtBSCDec)) };
+  } catch(e) { console.warn('BSC balance error', e); }
+  
+  try {
+    // ETH
+    const ethNative = await ethProvider.getBalance(addr);
+    const usdtETH = new ethers.Contract(USDT_ETH, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], ethProvider);
+    const usdtETHBal = await usdtETH.balanceOf(addr);
+    const usdtETHDec = await usdtETH.decimals();
+    balances.eth = { native: parseFloat(ethers.utils.formatEther(ethNative)), usdt: parseFloat(ethers.utils.formatUnits(usdtETHBal, usdtETHDec)) };
+  } catch(e) { console.warn('ETH balance error', e); }
+  
+  try {
+    // Polygon
+    const polygonNative = await polygonProvider.getBalance(addr);
+    balances.polygon = { native: parseFloat(ethers.utils.formatEther(polygonNative)), usdt: 0 }; // USDT not added for simplicity
+  } catch(e) { console.warn('Polygon balance error', e); }
+  
+  try {
+    // Bitcoin
+    const btcAddr = deriveBTCAddress(walletData.mnemonic);
+    const response = await fetch(BTC_API + btcAddr);
+    const data = await response.json();
+    const satoshis = data[btcAddr] || 0;
+    balances.btc = satoshis / 1e8;
+  } catch(e) { console.warn('BTC balance error', e); }
+  
+  updateUI();
+}
+
+// ====================== UPDATE UI ======================
+function updateUI() {
+  const total = (balances.bsc.native * 300) + (balances.bsc.efc * 0.005) + (balances.bsc.usdt * 1) +
+                (balances.eth.native * 3000) + (balances.eth.usdt * 1) +
+                (balances.polygon.native * 1.5) +
+                (balances.btc * 60000);
+  $('totalBalance').innerText = '$' + total.toFixed(2);
+  
+  // Chain balances display
+  let html = `
+    <div class="coin-row"><span>🔵 BNB</span><span>${balances.bsc.native.toFixed(4)}</span></div>
+    <div class="coin-row"><span>EFC</span><span>${balances.bsc.efc.toFixed(4)}</span></div>
+    <div class="coin-row"><span>USDT (BSC)</span><span>${balances.bsc.usdt.toFixed(2)}</span></div>
+    <div class="coin-row"><span>⚡ ETH</span><span>${balances.eth.native.toFixed(4)}</span></div>
+    <div class="coin-row"><span>USDT (ETH)</span><span>${balances.eth.usdt.toFixed(2)}</span></div>
+    <div class="coin-row"><span>🟣 MATIC</span><span>${balances.polygon.native.toFixed(4)}</span></div>
+    <div class="coin-row"><span>₿ BTC</span><span>${balances.btc.toFixed(8)}</span></div>
+  `;
+  $('chainBalances').innerHTML = html;
+  $('balanceList').innerHTML = html;
+  
+  // Addresses
+  let addrHtml = `
+    <div class="coin-row"><span>BNB Chain</span><span class="font-mono text-xs">${walletData.address}</span></div>
+    <div class="coin-row"><span>Ethereum</span><span class="font-mono text-xs">${walletData.address}</span></div>
+    <div class="coin-row"><span>Polygon</span><span class="font-mono text-xs">${walletData.address}</span></div>
+    <div class="coin-row"><span>Bitcoin</span><span class="font-mono text-xs">${deriveBTCAddress(walletData.mnemonic)}</span></div>
+  `;
+  $('addressList').innerHTML = addrHtml;
+  $('displayAddress').innerText = walletData.address;
+}
+
+// ====================== CONNECT / UNLOCK ======================
+function unlockAndConnect(password) {
+  const result = unlockWallet(password);
+  if (!result) { showToast('Wrong password', true); return false; }
+  walletData = result;
+  isUnlocked = true;
+  $('statusBadge').innerText = 'Connected';
+  $('statusBadge').style.background = '#22c55e';
+  $('connectBtn').innerHTML = '<i class="fas fa-check"></i> Connected';
+  $('connectBtn').disabled = true;
+  $('lockBtn').innerHTML = '<i class="fas fa-lock"></i> Lock';
+  // Initialize providers
+  const bscProvider = new ethers.providers.JsonRpcProvider(CHAINS.bsc.rpc);
+  signer = new ethers.Wallet(walletData.privateKey, bscProvider);
+  tokenContract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signer);
+  loadBalances();
+  loadStaking();
+  return true;
+}
+
+// ====================== LOCK ======================
+function lockWallet() {
+  isUnlocked = false;
+  walletData = null;
+  $('statusBadge').innerText = 'Locked';
+  $('statusBadge').style.background = '#ef4444';
+  $('connectBtn').innerHTML = '<i class="fas fa-link"></i> Connect';
+  $('connectBtn').disabled = false;
+  $('lockBtn').innerHTML = '<i class="fas fa-lock"></i> Lock';
+  showToast('Wallet locked');
+}
+
+// ====================== STAKING ======================
+async function loadStaking() {
+  if (!tokenContract || !walletData) return;
+  try {
+    const staked = await tokenContract.staked(walletData.address);
+    const reward = await tokenContract.pendingReward(walletData.address);
+    const total = await tokenContract.totalStaked();
+    $('stakedAmount').innerText = ethers.utils.formatUnits(staked, 18).slice(0,8) + ' EFC';
+    $('pendingReward').innerText = ethers.utils.formatUnits(reward, 18).slice(0,8) + ' EFC';
+    $('totalPool').innerText = ethers.utils.formatUnits(total, 18).slice(0,10) + ' EFC';
+  } catch(e) { console.warn(e); }
+}
+
+// ====================== EVENT BINDINGS ======================
+// Connect / Unlock
+$('connectBtn').onclick = () => {
+  if (localStorage.getItem('efc_wallet_encrypted')) {
+    openModal(`
+      <h3>Enter Password</h3>
+      <input type="password" id="unlockPassword" class="input-field mt-2" placeholder="Your password">
+      <button id="unlockConfirm" class="btn-primary mt-2">Unlock</button>
+      <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
+    `);
+    $('unlockConfirm').onclick = () => {
+      const pw = $('unlockPassword').value;
+      if (unlockAndConnect(pw)) { closeModal(); }
+    };
+  } else {
+    openModal(`
+      <h3>No wallet found</h3>
+      <p>Create a new wallet or import one.</p>
+      <div class="flex gap-2 mt-2">
+        <button id="modalCreate" class="btn-primary">Create New</button>
+        <button id="modalImport" class="btn-secondary">Import</button>
+      </div>
+    `);
+    $('modalCreate').onclick = () => { closeModal(); $('createWalletBtn').click(); };
+    $('modalImport').onclick = () => { closeModal(); $('importWalletBtn').click(); };
+  }
+};
+
+$('lockBtn').onclick = lockWallet;
+
+// Create Wallet
+$('createWalletBtn').onclick = () => {
+  openModal(`
+    <h3>Create New Wallet</h3>
+    <p>Set a password (used to encrypt your seed phrase).</p>
+    <input type="password" id="newPassword" class="input-field mt-2" placeholder="Password">
+    <input type="password" id="confirmPassword" class="input-field mt-2" placeholder="Confirm password">
+    <button id="createConfirm" class="btn-primary mt-2">Generate</button>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
+  `);
+  $('createConfirm').onclick = () => {
+    const pw = $('newPassword').value;
+    const cpw = $('confirmPassword').value;
+    if (!pw || pw.length < 4) { showToast('Password must be at least 4 characters', true); return; }
+    if (pw !== cpw) { showToast('Passwords do not match', true); return; }
+    const result = createNewWallet(pw);
+    showToast('Wallet created! Please unlock with your password.');
+    closeModal();
+    // Auto-unlock
+    unlockAndConnect(pw);
+  };
+};
+
+// Import Wallet
+$('importWalletBtn').onclick = () => {
+  openModal(`
+    <h3>Import Wallet</h3>
+    <p>Enter your 12‑word recovery phrase.</p>
+    <textarea id="importMnemonic" class="input-field mt-2" rows="3" placeholder="word1 word2 ... word12"></textarea>
+    <input type="password" id="importPassword" class="input-field mt-2" placeholder="Set a password to encrypt">
+    <button id="importConfirm" class="btn-primary mt-2">Import</button>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
+  `);
+  $('importConfirm').onclick = () => {
+    const mnemonic = $('importMnemonic').value.trim();
+    const pw = $('importPassword').value;
+    if (!mnemonic || mnemonic.split(' ').length < 12) { showToast('Invalid mnemonic', true); return; }
+    if (!pw || pw.length < 4) { showToast('Password required', true); return; }
+    try {
+      const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+      const encrypted = encryptMnemonic(mnemonic, pw);
+      localStorage.setItem('efc_wallet_encrypted', encrypted);
+      localStorage.setItem('efc_wallet_address', wallet.address);
+      showToast('Wallet imported!');
+      closeModal();
+      unlockAndConnect(pw);
+    } catch(e) { showToast('Import failed: '+e.message, true); }
+  };
+};
+
+// Refresh
+$('refreshBtn').onclick = () => { if (isUnlocked) { loadBalances(); loadStaking(); showToast('Refreshed'); } };
+
+// Send
+$('sendBtn').onclick = () => {
+  if (!isUnlocked) { showToast('Unlock wallet first', true); return; }
+  openModal(`
+    <h3>Send EFC</h3>
+    <input type="text" id="sendTo" class="input-field mt-2" placeholder="Recipient address">
+    <input type="number" id="sendAmount" class="input-field mt-2" placeholder="Amount (EFC)">
+    <button id="sendConfirm" class="btn-primary mt-2">Send</button>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
+  `);
+  $('sendConfirm').onclick = async () => {
+    const to = $('sendTo').value;
+    const amt = $('sendAmount').value;
+    if (!ethers.utils.isAddress(to)) { showToast('Invalid address', true); return; }
+    if (!amt || parseFloat(amt)<=0) { showToast('Invalid amount', true); return; }
+    try {
+      const parsed = ethers.utils.parseUnits(amt, 18);
+      const tx = await tokenContract.transfer(to, parsed);
+      showToast('Sending...');
+      await tx.wait();
+      showToast('Sent!');
+      closeModal();
+      loadBalances();
+    } catch(e) { showToast('Send failed: '+e.message.slice(0,80), true); }
+  };
+};
+
+// Receive
+$('receiveBtn').onclick = () => {
+  if (!isUnlocked) { showToast('Unlock wallet first', true); return; }
+  openModal(`
+    <h3>Receive</h3>
+    <p>Your EVM address (BNB, ETH, MATIC):</p>
+    <div class="font-mono text-xs break-all bg-gray-800 p-2 rounded-xl">${walletData.address}</div>
+    <p>Your Bitcoin address:</p>
+    <div class="font-mono text-xs break-all bg-gray-800 p-2 rounded-xl">${deriveBTCAddress(walletData.mnemonic)}</div>
+    <div id="qrContainer" class="mt-2"></div>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Close</button>
+  `);
+  new QRCode(document.getElementById('qrContainer'), { text: walletData.address, width: 200, height: 200 });
+};
+
+// Staking buttons
+$('stakeBtn').onclick = async () => {
+  if (!isUnlocked) { showToast('Unlock first', true); return; }
+  const amt = $('stakeInput').value;
+  if (!amt || parseFloat(amt)<=0) { showToast('Enter amount', true); return; }
+  try {
+    const parsed = ethers.utils.parseUnits(amt, 18);
+    const approve = await tokenContract.approve(EFC_ADDRESS, parsed);
+    await approve.wait();
+    const tx = await tokenContract.deposit(parsed);
+    showToast('Staking...');
+    await tx.wait();
+    showToast('Staked!');
+    loadStaking(); loadBalances();
+  } catch(e) { showToast('Stake failed: '+e.message.slice(0,80), true); }
+};
+$('unstakeBtn').onclick = async () => {
+  if (!isUnlocked) { showToast('Unlock first', true); return; }
+  const amt = $('stakeInput').value;
+  if (!amt) { showToast('Enter amount', true); return; }
+  try {
+    const parsed = ethers.utils.parseUnits(amt, 18);
+    const tx = await tokenContract.withdraw(parsed);
+    showToast('Unstaking...');
+    await tx.wait();
+    showToast('Unstaked!');
+    loadStaking(); loadBalances();
+  } catch(e) { showToast('Unstake failed', true); }
+};
+$('claimRewardBtn').onclick = async () => {
+  if (!isUnlocked) { showToast('Unlock first', true); return; }
+  try {
+    const tx = await tokenContract.claimRewards();
+    showToast('Claiming...');
+    await tx.wait();
+    showToast('Rewards claimed!');
+    loadStaking();
+  } catch(e) { showToast('Claim failed', true); }
+};
+
+// Sidebar navigation
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.onclick = () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    const section = item.dataset.section;
+    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+    document.getElementById('section-'+section).classList.remove('hidden');
+  };
+});
+
+// ====================== INIT ======================
+// Auto‑unlock if encrypted wallet exists and we have password? We'll let user click connect.
+// Check if wallet exists
+if (localStorage.getItem('efc_wallet_encrypted')) {
+  $('statusBadge').innerText = 'Locked';
+  $('statusBadge').style.background = '#ef4444';
+} else {
+  $('statusBadge').innerText = 'No wallet';
+  $('statusBadge').style.background = '#6b7280';
 }
 </script>
 </body>
