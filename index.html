@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0c12">
-  <title>Efikcoin – Coin is Life</title>
+  <title>Efikcoin – Complete Wallet + Merchant</title>
   <link rel="icon" href="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" type="image/png">
-  <!-- Google Translate Widget -->
+  <!-- Google Translate -->
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   <script>
     function googleTranslateElementInit() {
@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    /* ===== RESET & BASE ===== */
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
     body { background:#0a0c12; color:#eef2ff; font-size:20px; min-height:100vh; overflow-x:hidden; }
     .container { max-width:1400px; margin:0 auto; padding:2rem; }
@@ -45,7 +46,7 @@
     .badge { background:#1e293b; padding:0.5rem 1.5rem; border-radius:3rem; font-size:0.9rem; }
     .toast { position:fixed; bottom:30px; right:30px; background:#1e293b; border-left:6px solid #3b82f6; padding:1.2rem 2rem; border-radius:1.5rem; z-index:9999; display:none; align-items:center; gap:1rem; font-size:1.1rem; box-shadow:0 15px 35px #00000077; }
     .modal-overlay { display:none; position:fixed; inset:0; background:#000000bb; backdrop-filter:blur(8px); z-index:10000; align-items:center; justify-content:center; }
-    .modal-box { background:#0f172a; padding:2.5rem; border-radius:2.5rem; max-width:750px; width:95%; border:1px solid #8b5cf6; max-height:80vh; overflow-y:auto; font-size:1.1rem; }
+    .modal-box { background:#0f172a; padding:2.5rem; border-radius:2.5rem; max-width:900px; width:95%; border:1px solid #8b5cf6; max-height:85vh; overflow-y:auto; font-size:1.1rem; }
     .coin-card { background:#1e293b; padding:1.8rem 1.2rem; border-radius:2rem; text-align:center; transition:0.3s; cursor:pointer; border:1px solid transparent; position:relative; overflow:hidden; }
     .coin-card:hover { transform:translateY(-6px); box-shadow:0 15px 35px #8b5cf633; border-color:#8b5cf6; }
     .coin-card .logo-bg { position:absolute; right:-20px; bottom:-20px; opacity:0.05; width:100px; height:100px; pointer-events:none; }
@@ -73,15 +74,13 @@
 </head>
 <body>
 <!-- Rotating NFT Background -->
-<div class="rotating-bg">
-  <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="EFC NFT">
-</div>
+<div class="rotating-bg"><img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="EFC NFT"></div>
 
 <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toastMsg"></span></div>
 <div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalContent"></div></div>
 
 <div class="container" id="app">
-  <!-- ========== HEADER ========== -->
+  <!-- ===== HEADER ===== -->
   <header class="flex-between mb-5">
     <div class="flex gap-3 items-center">
       <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="Logo" style="width:64px; height:64px; border-radius:50%;">
@@ -96,9 +95,9 @@
     </div>
   </header>
 
-  <!-- ========== LANDING + WHITEPAPER ========== -->
+  <!-- ===== LANDING + WHITEPAPER ===== -->
   <div id="landingPage">
-    <div class="welcome-screen">
+    <div class="welcome-screen" id="welcomeScreen">
       <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="Logo" class="logo-large">
       <h1>Efikcoin Wallet</h1>
       <p style="color:#aaa; font-size:1.4rem;">Coin is Life, Life is Coin.</p>
@@ -162,7 +161,7 @@
     </section>
   </div>
 
-  <!-- ========== WALLET DASHBOARD ========== -->
+  <!-- ===== WALLET DASHBOARD ===== -->
   <div id="walletDashboard" class="hidden mt-4">
     <div class="glass flex-between">
       <div><h2 class="text-3xl font-bold"><i class="fas fa-wallet"></i> My Wallet</h2></div>
@@ -174,7 +173,7 @@
       </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- Tabs: Wallet, Merchant, Whitepaper -->
     <div class="nav-tabs mt-5">
       <span class="nav-tab active" data-tab="walletTab"><i class="fas fa-chart-pie"></i> Wallet</span>
       <span class="nav-tab" data-tab="merchantTab"><i class="fas fa-store"></i> Merchant</span>
@@ -284,39 +283,61 @@
 </div>
 
 <script>
-// ====================== CONFIGURATION ======================
+// =======================================================================
+//                        CONFIGURATION
+// =======================================================================
 const EFC_ADDRESS = "0x677ce9cba67f7484ea951a12897ce780cfd8fed1";
 const TREASURY_ADDRESS = "0x676cCf34C191a9D6EFE4B265b84877C619A559d0";
 const BSC_RPC = "https://bsc-dataseed.binance.com/";
 const EFC_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"recipients","type":"uint256"}],"name":"AirdropCompleted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"RewardsClaimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Staked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Unstaked","type":"event"},{"inputs":[],"name":"APY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"DEAD","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"recipients","type":"address[]"},{"internalType":"uint256","name":"amountEach","type":"uint256"}],"name":"airdrop","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address[]","name":"recipients","type":"address[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"}],"name":"airdropVaried","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"o","type":"address"},{"internalType":"address","name":"s","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"s","type":"address"},{"internalType":"uint256","name":"a","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"a","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"claimRewards","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"deposit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"fundStaking","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isFeeExempt","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isMaxExempt","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isPair","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxWallet","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"openTrading","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"pendingReward","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"sellFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"a","type":"address"},{"internalType":"bool","name":"e","type":"bool"}],"name":"setFeeExempt","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"a","type":"address"},{"internalType":"bool","name":"e","type":"bool"}],"name":"setMaxExempt","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"pair","type":"address"},{"internalType":"bool","name":"status","type":"bool"}],"name":"setPair","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"stakeStart","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"staked","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"pure","type":"function"},{"inputs":[],"name":"totalStaked","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"tradingOpen","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"a","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"f","type":"address"},{"internalType":"address","name":"t","type":"address"},{"internalType":"uint256","name":"a","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"treasuryWallet","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 const USDT_BSC = "0x55d398326f99059fF775485246999027B3197955";
+const USDT_ETH = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 const FEE_PERCENT = 0.005;
 
-// ====================== STATE ======================
-let walletData = null;
+// =======================================================================
+//                         STATE
+// =======================================================================
+let walletData = null;            // { mnemonic, address, privateKey }
 let balances = { bsc:{native:0, efc:0, usdt:0}, eth:{native:0, usdt:0}, polygon:{native:0}, btc:0 };
-let tokenContract = null, signer = null, isUnlocked = false;
-let priceChartInstance = null, customTokens = [], merchantRequests = [];
+let tokenContract = null, signer = null;
+let isUnlocked = false;
+let priceChartInstance = null;
+let customTokens = [];
+let merchantRequests = [];
 
-// ====================== HELPERS ======================
+// =======================================================================
+//                         HELPERS
+// =======================================================================
 const $ = id => document.getElementById(id);
 const toastMsg = $('toastMsg');
 const toast = $('toast');
+
 function showToast(text, isError=false) {
   toastMsg.innerText = text;
   toast.style.borderLeftColor = isError ? '#ef4444' : '#3b82f6';
   toast.style.display = 'flex';
   setTimeout(() => toast.style.display = 'none', 5000);
 }
-function openModal(html) { document.getElementById('modalContent').innerHTML = html; document.getElementById('modalOverlay').style.display = 'flex'; }
-function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
-document.getElementById('modalOverlay').addEventListener('click', (e) => { if(e.target === e.currentTarget) closeModal(); });
 
+function openModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('modalOverlay').style.display = 'none';
+}
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Simple encryption (XOR with password hash)
 function hashPassword(pw) { let h=0; for(let i=0;i<pw.length;i++){ h=((h<<5)-h)+pw.charCodeAt(i); h|=0; } return h.toString(); }
 function encryptMnemonic(m, pw) { const key=hashPassword(pw); let r=''; for(let i=0;i<m.length;i++){ r+=String.fromCharCode(m.charCodeAt(i)^key.charCodeAt(i%key.length)); } return btoa(r); }
 function decryptMnemonic(e, pw) { const key=hashPassword(pw); const d=atob(e); let r=''; for(let i=0;i<d.length;i++){ r+=String.fromCharCode(d.charCodeAt(i)^key.charCodeAt(i%key.length)); } return r; }
 
-// ====================== WALLET FUNCTIONS ======================
+// =======================================================================
+//                         WALLET CORE
+// =======================================================================
 function createNewWallet(password) {
   const wallet = ethers.Wallet.createRandom();
   const mnemonic = wallet.mnemonic.phrase;
@@ -325,6 +346,7 @@ function createNewWallet(password) {
   localStorage.setItem('efc_wallet_address', address);
   return { mnemonic, address, privateKey: wallet.privateKey };
 }
+
 function unlockWallet(password) {
   const enc = localStorage.getItem('efc_wallet_encrypted');
   if (!enc) return null;
@@ -335,6 +357,7 @@ function unlockWallet(password) {
     return { mnemonic, address: wallet.address, privateKey: wallet.privateKey };
   } catch(e) { return null; }
 }
+
 function deriveBTCAddress(mnemonic) {
   try {
     const seed = bip32.fromSeed(Buffer.from(ethers.Wallet.fromMnemonic(mnemonic).mnemonic.entropy, 'hex'));
@@ -344,7 +367,9 @@ function deriveBTCAddress(mnemonic) {
   } catch(e) { return 'BTC address unavailable'; }
 }
 
-// ====================== LOAD BALANCES ======================
+// =======================================================================
+//                         BALANCE & DATA FETCHING
+// =======================================================================
 async function loadBalances() {
   if (!walletData) return;
   const addr = walletData.address;
@@ -372,7 +397,9 @@ async function loadBalances() {
   updateWalletUI();
 }
 
-// ====================== PRICE CHART ======================
+// =======================================================================
+//                         PRICE CHART
+// =======================================================================
 async function updatePriceChart() {
   try {
     const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${EFC_ADDRESS}`);
@@ -396,7 +423,9 @@ async function updatePriceChart() {
 }
 setInterval(updatePriceChart, 30000);
 
-// ====================== UPDATE UI ======================
+// =======================================================================
+//                         UPDATE UI
+// =======================================================================
 function updateWalletUI() {
   if (!walletData) return;
   const total = (balances.bsc.native * 300) + (balances.bsc.efc * 0.005) + (balances.bsc.usdt * 1) +
@@ -406,21 +435,22 @@ function updateWalletUI() {
   document.getElementById('walletAddressDisplay').innerText = walletData.address.slice(0,8)+'...'+walletData.address.slice(-6);
   document.getElementById('bscScanLink').href = `https://bscscan.com/address/${walletData.address}`;
   document.getElementById('receiveAddress').innerText = walletData.address;
+  // Coin grid
   const coins = [
-    { id:'bnb', label:'BNB', icon:'🔵', balance: balances.bsc.native, chain:'bsc', address: walletData.address, isNative:true },
-    { id:'eth', label:'ETH', icon:'⚡', balance: balances.eth.native, chain:'eth', address: walletData.address, isNative:true },
-    { id:'matic', label:'MATIC', icon:'🟣', balance: balances.polygon.native, chain:'polygon', address: walletData.address, isNative:true },
-    { id:'btc', label:'BTC', icon:'₿', balance: balances.btc, chain:'btc', address: deriveBTCAddress(walletData.mnemonic), isNative:true },
-    { id:'efc', label:'EFC', icon:'🪙', balance: balances.bsc.efc, chain:'bsc', address: walletData.address, isErc:true, contract:EFC_ADDRESS, symbol:'EFC' },
-    { id:'usdt', label:'USDT', icon:'💵', balance: balances.bsc.usdt + balances.eth.usdt, chain:'bsc', address: walletData.address, isErc:true, contract:USDT_BSC, symbol:'USDT' }
+    { id:'bnb', label:'BNB', icon:'🔵', balance: balances.bsc.native, chain:'bsc', symbol:'BNB' },
+    { id:'eth', label:'ETH', icon:'⚡', balance: balances.eth.native, chain:'eth', symbol:'ETH' },
+    { id:'matic', label:'MATIC', icon:'🟣', balance: balances.polygon.native, chain:'polygon', symbol:'MATIC' },
+    { id:'btc', label:'BTC', icon:'₿', balance: balances.btc, chain:'btc', symbol:'BTC' },
+    { id:'efc', label:'EFC', icon:'🪙', balance: balances.bsc.efc, chain:'bsc', symbol:'EFC', contract:EFC_ADDRESS },
+    { id:'usdt', label:'USDT', icon:'💵', balance: balances.bsc.usdt + balances.eth.usdt, chain:'bsc', symbol:'USDT', contract:USDT_BSC }
   ];
   customTokens.forEach(t => {
     const bal = balances[t.chain] && balances[t.chain][t.symbol.toLowerCase()] ? balances[t.chain][t.symbol.toLowerCase()] : 0;
-    coins.push({ id:'custom_'+t.address, label:t.symbol, icon:'🔷', balance: bal, chain:t.chain, address: walletData.address, isErc:true, contract:t.address, symbol:t.symbol });
+    coins.push({ id:'custom_'+t.address, label:t.symbol, icon:'🔷', balance: bal, chain:t.chain, symbol:t.symbol, contract:t.address });
   });
   let html = '';
   coins.forEach(c => {
-    html += `<div class="coin-card" onclick="openCoinDetail('${c.id}')">
+    html += `<div class="coin-card" onclick="openCoinDashboard('${c.id}')">
       <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" class="logo-bg" alt="">
       <div class="coin-icon">${c.icon}</div>
       <div class="font-bold">${c.label}</div>
@@ -432,7 +462,9 @@ function updateWalletUI() {
   loadTxHistory();
 }
 
-// ====================== TRANSACTION HISTORY ======================
+// =======================================================================
+//                         TRANSACTION HISTORY
+// =======================================================================
 async function loadTxHistory() {
   if (!walletData) return;
   const container = document.getElementById('txHistoryList');
@@ -459,38 +491,91 @@ async function loadTxHistory() {
         </div>`;
       }
     }
+    // Include outgoing from local storage
+    const stored = JSON.parse(localStorage.getItem('efc_tx_history') || '[]');
+    if (stored.length > 0) {
+      html += '<div class="mt-2"><strong>Outgoing:</strong></div>';
+      stored.slice(0,5).forEach(tx => {
+        html += `<div class="flex-between border-b border-gray-700 py-2">
+          <span><strong>-${parseFloat(tx.amount).toFixed(4)} EFC</strong> to ${tx.to.slice(0,6)}...${tx.to.slice(-4)}</span>
+          <span class="text-sm text-gray-400">${tx.time}</span>
+          <a href="https://bscscan.com/tx/${tx.hash}" target="_blank" class="text-blue-400"><i class="fas fa-external-link-alt"></i></a>
+        </div>`;
+      });
+    }
     container.innerHTML = html;
   } catch(e) { container.innerHTML = '<p class="text-gray-400">Could not load history.</p>'; }
 }
 
-// ====================== COIN DETAIL MODAL ======================
-function openCoinDetail(coinId) {
-  // We'll implement a full modal with all actions.
-  // For brevity, we'll show a simple modal with send and receive.
-  // In practice, you can expand this.
-  let info = null;
+// =======================================================================
+//                         COIN DASHBOARD (Full)
+// =======================================================================
+function openCoinDashboard(coinId) {
+  // Find coin info
   const allCoins = [
-    { id:'bnb', label:'BNB', balance: balances.bsc.native, chain:'bsc', symbol:'BNB' },
-    { id:'eth', label:'ETH', balance: balances.eth.native, chain:'eth', symbol:'ETH' },
-    { id:'matic', label:'MATIC', balance: balances.polygon.native, chain:'polygon', symbol:'MATIC' },
-    { id:'btc', label:'BTC', balance: balances.btc, chain:'btc', symbol:'BTC' },
-    { id:'efc', label:'EFC', balance: balances.bsc.efc, chain:'bsc', symbol:'EFC', contract:EFC_ADDRESS },
-    { id:'usdt', label:'USDT', balance: balances.bsc.usdt + balances.eth.usdt, chain:'bsc', symbol:'USDT', contract:USDT_BSC }
+    { id:'bnb', label:'BNB', icon:'🔵', balance: balances.bsc.native, chain:'bsc', symbol:'BNB', isNative:true },
+    { id:'eth', label:'ETH', icon:'⚡', balance: balances.eth.native, chain:'eth', symbol:'ETH', isNative:true },
+    { id:'matic', label:'MATIC', icon:'🟣', balance: balances.polygon.native, chain:'polygon', symbol:'MATIC', isNative:true },
+    { id:'btc', label:'BTC', icon:'₿', balance: balances.btc, chain:'btc', symbol:'BTC', isNative:true },
+    { id:'efc', label:'EFC', icon:'🪙', balance: balances.bsc.efc, chain:'bsc', symbol:'EFC', contract:EFC_ADDRESS, isErc:true },
+    { id:'usdt', label:'USDT', icon:'💵', balance: balances.bsc.usdt + balances.eth.usdt, chain:'bsc', symbol:'USDT', contract:USDT_BSC, isErc:true }
   ];
-  info = allCoins.find(c => c.id === coinId);
+  customTokens.forEach(t => {
+    const bal = balances[t.chain] && balances[t.chain][t.symbol.toLowerCase()] ? balances[t.chain][t.symbol.toLowerCase()] : 0;
+    allCoins.push({ id:'custom_'+t.address, label:t.symbol, icon:'🔷', balance: bal, chain:t.chain, symbol:t.symbol, contract:t.address, isErc:true });
+  });
+  const info = allCoins.find(c => c.id === coinId);
   if (!info) return;
-  openModal(`
-    <h3>${info.label} Dashboard</h3>
-    <p>Balance: ${info.balance.toFixed(6)} ${info.symbol}</p>
-    <div class="flex gap-2 mt-3">
-      <button class="btn-primary" onclick="sendCoin('${info.chain}','${info.symbol}','${info.contract||''}')">Send</button>
-      <button class="btn-secondary" onclick="receiveCoin('${walletData.address}')">Receive</button>
-      <button class="btn-secondary" onclick="closeModal()">Close</button>
+
+  // Build actions
+  let actions = `
+    <button class="btn-primary" onclick="sendCoin('${info.chain}','${info.symbol}','${info.contract||''}')"><i class="fas fa-paper-plane"></i> Send</button>
+    <button class="btn-secondary" onclick="receiveCoin('${walletData.address}')"><i class="fas fa-qrcode"></i> Receive</button>
+    <button class="btn-secondary" onclick="buyCoin('${info.symbol}','${info.contract||''}')"><i class="fas fa-shopping-cart"></i> Buy</button>
+    <button class="btn-secondary" onclick="sellCoin('${info.symbol}','${info.contract||''}')"><i class="fas fa-arrow-up"></i> Sell</button>
+    <button class="btn-secondary" onclick="swapCoin('${info.symbol}','${info.contract||''}')"><i class="fas fa-exchange-alt"></i> Swap</button>
+    <button class="btn-secondary" onclick="copyAddress('${walletData.address}')"><i class="fas fa-copy"></i> Copy</button>
+    <a href="https://bscscan.com/address/${walletData.address}" target="_blank" class="btn-secondary"><i class="fas fa-external-link-alt"></i> BscScan</a>
+  `;
+  if (info.symbol === 'EFC') {
+    actions += `
+      <button class="btn-primary" onclick="stakeEFC()"><i class="fas fa-lock"></i> Stake</button>
+      <button class="btn-secondary" onclick="unstakeEFC()"><i class="fas fa-unlock"></i> Unstake</button>
+      <button class="btn-secondary" onclick="claimRewardsEFC()"><i class="fas fa-gift"></i> Claim</button>
+    `;
+  }
+  // Price chart for this coin (simplified – we can reuse the main chart or show a mini one)
+  // We'll just show the balance and actions.
+  const modalHtml = `
+    <h3 class="text-3xl font-bold">${info.icon} ${info.label} Dashboard</h3>
+    <div class="mt-2 text-xl">Balance: <strong>${info.balance.toFixed(6)} ${info.symbol}</strong></div>
+    <div style="height:80px; margin:1rem 0;">
+      <canvas id="coinChart"></canvas>
     </div>
-  `);
+    <div class="flex flex-wrap gap-3 mt-4">${actions}</div>
+    <div class="mt-4 text-sm text-gray-400">Address: <span class="font-mono break-all">${walletData.address}</span></div>
+    <button onclick="closeModal()" class="btn-secondary mt-4">Close</button>
+  `;
+  openModal(modalHtml);
+  // Draw a mini chart for the coin (using the same price data)
+  setTimeout(() => {
+    const ctx = document.getElementById('coinChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1h','2h','3h','4h','5h','6h'],
+          datasets: [{ label: 'Price', data: [0.005,0.006,0.0055,0.007,0.0065,0.008], borderColor: '#8b5cf6', tension: 0.4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+    }
+  }, 100);
 }
 
-// ====================== SEND ======================
+// =======================================================================
+//                         SEND / RECEIVE / BUY / SELL / SWAP
+// =======================================================================
 async function sendCoin(chain, symbol, contractAddress) {
   if (!walletData) { showToast('Unlock wallet first', true); return; }
   const provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
@@ -531,13 +616,16 @@ async function sendCoin(chain, symbol, contractAddress) {
       showToast('Sending...');
       await tx.wait();
       showToast(`Sent ${finalAmount} ${symbol} successfully!`);
+      // Save outgoing
+      const hist = JSON.parse(localStorage.getItem('efc_tx_history') || '[]');
+      hist.unshift({ to, amount: finalAmount, symbol, hash: tx.hash, time: new Date().toLocaleString() });
+      localStorage.setItem('efc_tx_history', JSON.stringify(hist.slice(0,20)));
       closeModal();
       loadBalances();
     } catch(e) { showToast('Send failed: '+e.message.slice(0,80), true); }
   };
 }
 
-// ====================== RECEIVE QR ======================
 function receiveCoin(addr) {
   openModal(`
     <h3>Receive</h3>
@@ -549,11 +637,99 @@ function receiveCoin(addr) {
   `);
   new QRCode(document.getElementById('qrContainer'), { text: addr, width: 200, height: 200 });
 }
-function openReceiveQR() {
-  if (walletData) receiveCoin(walletData.address);
+function openReceiveQR() { if (walletData) receiveCoin(walletData.address); }
+
+function buyCoin(symbol, contract) {
+  let url = 'https://pancakeswap.finance/swap?';
+  if (contract) url += `outputCurrency=${contract}`;
+  else url += `outputCurrency=${symbol}`;
+  window.open(url, '_blank');
+}
+function sellCoin(symbol, contract) {
+  let url = 'https://pancakeswap.finance/swap?';
+  if (contract) url += `inputCurrency=${contract}`;
+  else url += `inputCurrency=${symbol}`;
+  window.open(url, '_blank');
+}
+function swapCoin(symbol, contract) {
+  let url = 'https://app.1inch.io/#/56/swap/';
+  if (contract) url += contract;
+  else url += symbol;
+  window.open(url, '_blank');
 }
 
-// ====================== COPY ======================
+// =======================================================================
+//                         STAKING (EFC)
+// =======================================================================
+async function stakeEFC() {
+  if (!walletData) { showToast('Unlock first', true); return; }
+  openModal(`
+    <h3>Stake EFC</h3>
+    <input type="number" id="stakeAmountInput" class="input-field mt-2" placeholder="Amount to stake">
+    <button id="stakeConfirmBtn" class="btn-primary mt-2">Confirm Stake</button>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
+  `);
+  document.getElementById('stakeConfirmBtn').onclick = async () => {
+    const amt = document.getElementById('stakeAmountInput').value;
+    if (!amt || parseFloat(amt)<=0) { showToast('Invalid amount', true); return; }
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
+      const signerObj = new ethers.Wallet(walletData.privateKey, provider);
+      const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signerObj);
+      const parsed = ethers.utils.parseUnits(amt, 18);
+      const approve = await contract.approve(EFC_ADDRESS, parsed);
+      await approve.wait();
+      const tx = await contract.deposit(parsed);
+      showToast('Staking...');
+      await tx.wait();
+      showToast('Staked successfully!');
+      closeModal();
+      loadBalances();
+    } catch(e) { showToast('Stake failed: '+e.message.slice(0,80), true); }
+  };
+}
+async function unstakeEFC() {
+  if (!walletData) { showToast('Unlock first', true); return; }
+  openModal(`
+    <h3>Unstake EFC</h3>
+    <input type="number" id="unstakeAmountInput" class="input-field mt-2" placeholder="Amount to unstake">
+    <button id="unstakeConfirmBtn" class="btn-primary mt-2">Confirm Unstake</button>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
+  `);
+  document.getElementById('unstakeConfirmBtn').onclick = async () => {
+    const amt = document.getElementById('unstakeAmountInput').value;
+    if (!amt || parseFloat(amt)<=0) { showToast('Invalid amount', true); return; }
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
+      const signerObj = new ethers.Wallet(walletData.privateKey, provider);
+      const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signerObj);
+      const parsed = ethers.utils.parseUnits(amt, 18);
+      const tx = await contract.withdraw(parsed);
+      showToast('Unstaking...');
+      await tx.wait();
+      showToast('Unstaked successfully!');
+      closeModal();
+      loadBalances();
+    } catch(e) { showToast('Unstake failed: '+e.message.slice(0,80), true); }
+  };
+}
+async function claimRewardsEFC() {
+  if (!walletData) { showToast('Unlock first', true); return; }
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(BSC_RPC);
+    const signerObj = new ethers.Wallet(walletData.privateKey, provider);
+    const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signerObj);
+    const tx = await contract.claimRewards();
+    showToast('Claiming rewards...');
+    await tx.wait();
+    showToast('Rewards claimed!');
+    loadBalances();
+  } catch(e) { showToast('Claim failed: '+e.message.slice(0,80), true); }
+}
+
+// =======================================================================
+//                         COPY
+// =======================================================================
 function copyAddress(addr) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(addr).then(() => showToast('Address copied!')).catch(() => {});
@@ -565,7 +741,9 @@ function copyAddress(addr) {
 }
 document.getElementById('copyAddressBtn').onclick = () => { if(walletData) copyAddress(walletData.address); };
 
-// ====================== IMPORT TOKEN ======================
+// =======================================================================
+//                         IMPORT TOKEN
+// =======================================================================
 document.getElementById('importTokenBtn').onclick = () => {
   if (!walletData) { showToast('Unlock wallet first', true); return; }
   openModal(`
@@ -587,7 +765,9 @@ document.getElementById('importTokenBtn').onclick = () => {
   };
 };
 
-// ====================== AIRDROP CLAIM ======================
+// =======================================================================
+//                         AIRDROP CLAIM
+// =======================================================================
 document.getElementById('claimAirdropBtn').onclick = async () => {
   if (!walletData) { showToast('Unlock wallet', true); return; }
   try {
@@ -604,7 +784,9 @@ document.getElementById('claimAirdropBtn').onclick = async () => {
   }
 };
 
-// ====================== MERCHANT ======================
+// =======================================================================
+//                         MERCHANT MODULE
+// =======================================================================
 function loadMerchantRequests() {
   const stored = localStorage.getItem('efc_merchant_requests');
   merchantRequests = stored ? JSON.parse(stored) : [];
@@ -719,7 +901,9 @@ async function loadMerchantHistory() {
   } catch(e) { container.innerHTML = '<p class="text-gray-400">Could not load history.</p>'; }
 }
 
-// ====================== TABS ======================
+// =======================================================================
+//                         TAB SWITCHING
+// =======================================================================
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', function() {
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -746,7 +930,9 @@ document.querySelectorAll('[data-merchant-tab]').forEach(tab => {
   });
 });
 
-// ====================== UNLOCK / CONNECT ======================
+// =======================================================================
+//                         UNLOCK / CONNECT
+// =======================================================================
 function unlockAndConnect(password) {
   const result = unlockWallet(password);
   if (!result) { showToast('Wrong password', true); return false; }
@@ -770,6 +956,7 @@ function unlockAndConnect(password) {
   window._balanceInterval = setInterval(() => { if (isUnlocked) loadBalances(); }, 15000);
   return true;
 }
+
 function lockWallet() {
   isUnlocked = false;
   walletData = null;
@@ -785,7 +972,9 @@ function lockWallet() {
   showToast('Wallet locked');
 }
 
-// ====================== EVENT BINDINGS ======================
+// =======================================================================
+//                         EVENT BINDINGS
+// =======================================================================
 document.getElementById('connectBtn').onclick = () => {
   if (localStorage.getItem('efc_wallet_encrypted')) {
     openModal(`
@@ -852,16 +1041,23 @@ document.getElementById('welcomeImport').onclick = () => {
   };
 };
 
-// ====================== CHARITY BG ======================
+// =======================================================================
+//                         CHARITY BACKGROUND ROTATION
+// =======================================================================
 const charityImgs = [
   'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200',
   'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=1200',
   'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200'
 ];
 let idx=0;
-setInterval(() => { idx=(idx+1)%charityImgs.length; document.getElementById('charityBg').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5)), url('${charityImgs[idx]}')`; }, 7000);
+setInterval(() => {
+  idx = (idx+1) % charityImgs.length;
+  document.getElementById('charityBg').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5)), url('${charityImgs[idx]}')`;
+}, 7000);
 
-// ====================== INIT ======================
+// =======================================================================
+//                         INIT
+// =======================================================================
 if (localStorage.getItem('efc_wallet_encrypted')) {
   document.getElementById('welcomeScreen').style.display = 'flex';
   document.getElementById('landingPage').style.display = 'block';
