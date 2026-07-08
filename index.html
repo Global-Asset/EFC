@@ -4,19 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0c12">
-  <title>Efikcoin – Self‑Custodial Wallet</title>
+  <title>Efikcoin Wallet</title>
   <link rel="icon" href="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" type="image/png">
-  <!-- Google Translate -->
-  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-  <script>
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,fr,es,pt,zh,ar,de,it,ja,ru', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, 'google_translate_element');
-    }
-  </script>
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.11/dist/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bitcoinjs-lib@5.2.0/dist/bitcoinjs-lib.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bip32@2.0.6/dist/bip32.min.js"></script>
@@ -24,282 +15,87 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
-    body { background:#0a0c12; color:#eef2ff; font-size:20px; min-height:100vh; overflow-x:hidden; }
-    .container { max-width:1400px; margin:0 auto; padding:2rem; }
+    body { background:#0a0c12; color:#eef2ff; font-size:20px; min-height:100vh; display:flex; justify-content:center; align-items:center; }
+    .wallet-container { max-width:700px; width:100%; margin:2rem; }
     .glass { background:rgba(15,23,42,0.7); backdrop-filter:blur(24px); border:1px solid rgba(148,163,184,0.15); border-radius:2rem; padding:2rem; }
-    .btn-primary { background:linear-gradient(135deg,#3b82f6,#8b5cf6); border:none; padding:1rem 3rem; border-radius:3rem; color:white; font-weight:700; font-size:1.3rem; transition:0.3s; cursor:pointer; }
-    .btn-primary:hover { transform:scale(1.03); box-shadow:0 0 30px #8b5cf6aa; }
-    .btn-secondary { background:#1e293b; border:1px solid #475569; padding:1rem 3rem; border-radius:3rem; color:white; font-weight:600; font-size:1.3rem; transition:0.2s; cursor:pointer; }
+    .btn-primary { background:linear-gradient(135deg,#3b82f6,#8b5cf6); border:none; padding:1rem; border-radius:3rem; color:white; font-weight:700; font-size:1.2rem; transition:0.3s; cursor:pointer; width:100%; }
+    .btn-primary:hover { transform:scale(1.02); box-shadow:0 0 30px #8b5cf6aa; }
+    .btn-secondary { background:#1e293b; border:1px solid #475569; padding:0.8rem; border-radius:3rem; color:white; font-weight:600; font-size:1rem; transition:0.2s; cursor:pointer; width:100%; }
     .btn-secondary:hover { background:#334155; }
-    .btn-gold { background:#d4af37; color:#0a0a0a; border:none; padding:1rem 3rem; border-radius:3rem; font-weight:700; font-size:1.3rem; transition:0.3s; cursor:pointer; }
-    .btn-gold:hover { transform:scale(1.03); box-shadow:0 0 30px #d4af37aa; }
-    .btn-success { background:#22c55e; color:#0a0a0a; border:none; padding:1rem 3rem; border-radius:3rem; font-weight:700; font-size:1.3rem; transition:0.3s; cursor:pointer; }
-    .btn-success:hover { transform:scale(1.03); box-shadow:0 0 30px #22c55eaa; }
-    .flex-between { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem; }
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
-    .grid-3 { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:2rem; }
-    .input-field { background:#0f172a; border:1px solid #334155; padding:1rem 1.5rem; border-radius:1.5rem; width:100%; color:white; font-size:1.1rem; }
+    .btn-gold { background:#d4af37; color:#0a0a0a; border:none; padding:1rem; border-radius:3rem; font-weight:700; font-size:1.2rem; transition:0.3s; cursor:pointer; width:100%; }
+    .btn-gold:hover { transform:scale(1.02); box-shadow:0 0 30px #d4af37aa; }
+    .flex-between { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .input-field { background:#0f172a; border:1px solid #334155; padding:1rem; border-radius:1.5rem; width:100%; color:white; font-size:1rem; }
     .input-field:focus { border-color:#8b5cf6; outline:none; }
-    .badge { background:#1e293b; padding:0.5rem 1.5rem; border-radius:3rem; font-size:0.9rem; }
-    .toast { position:fixed; bottom:30px; right:30px; background:#1e293b; border-left:6px solid #3b82f6; padding:1.2rem 2rem; border-radius:1.5rem; z-index:9999; display:none; align-items:center; gap:1rem; font-size:1.1rem; box-shadow:0 15px 35px #00000077; }
+    .badge { background:#1e293b; padding:0.3rem 1rem; border-radius:2rem; font-size:0.8rem; }
+    .toast { position:fixed; bottom:30px; right:30px; background:#1e293b; border-left:6px solid #3b82f6; padding:1rem 2rem; border-radius:1.5rem; z-index:9999; display:none; align-items:center; gap:1rem; font-size:1rem; box-shadow:0 15px 35px #00000077; }
     .modal-overlay { display:none; position:fixed; inset:0; background:#000000bb; backdrop-filter:blur(8px); z-index:10000; align-items:center; justify-content:center; }
-    .modal-box { background:#0f172a; padding:2.5rem; border-radius:2.5rem; max-width:900px; width:95%; border:1px solid #8b5cf6; max-height:85vh; overflow-y:auto; font-size:1.1rem; }
-    .coin-card { background:#1e293b; padding:1.8rem 1.2rem; border-radius:2rem; text-align:center; transition:0.3s; cursor:pointer; border:1px solid transparent; position:relative; overflow:hidden; }
-    .coin-card:hover { transform:translateY(-6px); box-shadow:0 15px 35px #8b5cf633; border-color:#8b5cf6; }
-    .coin-card .logo-bg { position:absolute; right:-20px; bottom:-20px; opacity:0.05; width:100px; height:100px; pointer-events:none; }
-    .coin-icon { font-size:3.5rem; margin-bottom:0.8rem; }
-    .coin-card .font-bold { font-size:1.4rem; margin-bottom:0.3rem; }
-    .coin-card .text-sm { font-size:1.1rem; }
+    .modal-box { background:#0f172a; padding:2rem; border-radius:2rem; max-width:600px; width:95%; border:1px solid #8b5cf6; max-height:80vh; overflow-y:auto; }
+    .coin-card { background:#1e293b; padding:1.2rem; border-radius:1.5rem; text-align:center; transition:0.3s; cursor:pointer; border:1px solid transparent; }
+    .coin-card:hover { transform:translateY(-4px); box-shadow:0 10px 25px #8b5cf633; border-color:#8b5cf6; }
+    .coin-icon { font-size:2.5rem; margin-bottom:0.3rem; }
     .welcome-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:70vh; text-align:center; }
-    .welcome-screen h1 { font-size:4rem; color:#d4af37; letter-spacing:2px; }
-    .welcome-screen .logo-large { width:160px; height:160px; border-radius:50%; object-fit:contain; margin-bottom:2rem; }
-    .action-buttons { display:flex; flex-direction:column; gap:1.5rem; width:100%; max-width:500px; margin-top:2.5rem; }
+    .welcome-screen h1 { font-size:3rem; color:#d4af37; }
+    .welcome-screen .logo-large { width:120px; height:120px; border-radius:50%; object-fit:contain; margin-bottom:1.5rem; }
+    .action-buttons { display:flex; flex-direction:column; gap:1.2rem; width:100%; max-width:400px; margin-top:2rem; }
     .action-buttons button { width:100%; }
-    .disclaimer { color:#888; font-size:1rem; margin-top:3rem; max-width:500px; }
-    .charity-bg { background-image:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200'); background-size:cover; background-position:center; transition:background-image 1.2s; min-height:400px; }
-    .nav-tabs { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
-    .nav-tab { padding:0.8rem 2rem; border-radius:3rem; background:#1e293b; cursor:pointer; font-weight:600; font-size:1.2rem; transition:0.2s; }
-    .nav-tab.active { background:#8b5cf6; }
-    .nav-tab:hover { background:#334155; }
-    .merchant-request { background:#1e293b; padding:1.5rem; border-radius:1.5rem; margin-bottom:1.2rem; border-left:6px solid #d4af37; }
-    .rotating-bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none; opacity:0.03; display:flex; align-items:center; justify-content:center; }
-    .rotating-bg img { width:600px; height:600px; animation: rotate 60s linear infinite; }
-    @keyframes rotate { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-    #google_translate_element { margin-right: 1rem; }
-    .kyc-badge { background:#d4af37; color:#0a0a12; padding:0.3rem 1rem; border-radius:3rem; font-weight:700; font-size:0.8rem; }
-    .kyc-verified { background:#22c55e; color:#0a0a12; }
-    .kyc-pending { background:#facc15; color:#0a0a12; }
-    @media (max-width:700px) { .grid-2 { grid-template-columns:1fr; } .welcome-screen h1 { font-size:2.5rem; } body { font-size:16px; } }
+    .disclaimer { color:#888; font-size:0.9rem; margin-top:2rem; max-width:400px; }
+    .history-item { border-bottom:1px solid #1e293b; padding:0.5rem 0; display:flex; justify-content:space-between; font-size:0.9rem; }
+    .copy-btn { background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:1.2rem; }
+    .copy-btn:hover { color:#8b5cf6; }
+    @media (max-width:600px) { .grid-2 { grid-template-columns:1fr; } .wallet-container { margin:1rem; } }
   </style>
 </head>
 <body>
-<!-- Rotating NFT Background -->
-<div class="rotating-bg"><img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="EFC NFT"></div>
 
 <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toastMsg"></span></div>
 <div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalContent"></div></div>
 
-<div class="container" id="app">
-  <!-- ===== HEADER ===== -->
-  <header class="flex-between mb-5">
-    <div class="flex gap-3 items-center">
-      <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="Logo" style="width:64px; height:64px; border-radius:50%;">
-      <span class="text-3xl font-bold" style="color:#d4af37;">Efikcoin</span>
-      <span class="badge">BSC</span>
-      <span id="kycStatusBadge" class="badge kyc-pending" style="background:#facc15;">KYC: Pending</span>
-    </div>
-    <div class="flex gap-3 items-center">
-      <div id="google_translate_element"></div>
-      <button id="connectBtn" class="btn-primary"><i class="fas fa-wallet"></i> Launch</button>
-      <button id="lockBtn" class="btn-secondary hidden"><i class="fas fa-lock"></i> Lock</button>
-      <span id="statusBadge" class="badge">Offline</span>
-    </div>
-  </header>
+<div class="wallet-container">
 
-  <!-- ===== LANDING ===== -->
-  <div id="landingPage">
-    <div class="welcome-screen" id="welcomeScreen">
-      <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="Logo" class="logo-large">
-      <h1>Efikcoin Wallet</h1>
-      <p style="color:#aaa; font-size:1.4rem;">Coin is Life, Life is Coin.</p>
-      <div class="action-buttons">
-        <button id="welcomeCreate" class="btn-gold"><i class="fas fa-plus"></i> Create New Wallet</button>
-        <button id="welcomeImport" class="btn-secondary"><i class="fas fa-key"></i> Import Existing Wallet</button>
-      </div>
-      <p class="disclaimer">Self‑custody wallet. Efikcoin cannot recover your funds if you lose your seed phrase.</p>
+  <!-- ===== WELCOME SCREEN ===== -->
+  <div id="welcomeScreen" class="welcome-screen">
+    <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="Logo" class="logo-large">
+    <h1>Efikcoin Wallet</h1>
+    <p style="color:#aaa; font-size:1.2rem;">Coin is Life, Life is Coin.</p>
+    <div class="action-buttons">
+      <button id="welcomeCreate" class="btn-gold"><i class="fas fa-plus"></i> Create New Wallet</button>
+      <button id="welcomeImport" class="btn-secondary"><i class="fas fa-key"></i> Import Existing Wallet</button>
     </div>
-
-    <!-- Whitepaper Section -->
-    <section class="glass mt-5" id="whitepaper">
-      <h2 class="text-3xl font-bold">Efikcoin Whitepaper – Coin is Life</h2>
-      <div class="grid-2 mt-6">
-        <div>
-          <p><strong>Network:</strong> BNB Smart Chain (BEP-20)</p>
-          <p><strong>Contract:</strong> <span class="font-mono text-sm break-all">0x677ce9cba67f7484ea951a12897ce780cfd8fed1</span></p>
-          <p><strong>Treasury:</strong> <span class="font-mono text-sm break-all">0x676cCf34C191a9D6EFE4B265b84877C619A559d0</span></p>
-          <p><strong>LP Pair V2:</strong> <span class="font-mono text-sm break-all">0xa1DD6C528882Dc19EcCbC967F50bBC121A29630e</span></p>
-          <p><strong>Deployer:</strong> <span class="font-mono text-sm break-all">0xC5AD5cfcF81AD63a94227334b898eafCe6B27cCA</span></p>
-          <p><strong>BscScan:</strong> <a href="https://bscscan.com/token/0x677ce9cba67f7484ea951a12897ce780cfd8fed1" target="_blank" class="text-blue-400">View on BscScan</a></p>
-        </div>
-        <ul class="list-disc pl-5 text-lg">
-          <li>✓ Real‑World Payments (School, Food, Shopping)</li>
-          <li>✓ Self‑Custodial Wallet</li>
-          <li>✓ Staking Rewards 14% APY</li>
-          <li>✓ Airdrop & Loyalty Program</li>
-          <li>✓ Charity Treasury (2% tax)</li>
-          <li>✓ Transparent & Audited</li>
-        </ul>
-      </div>
-      <div class="mt-6 text-center text-yellow-200 text-lg italic">"For this generation and the next — in love we build the good nation."</div>
-    </section>
+    <p class="disclaimer">Self‑custody wallet. Efikcoin cannot recover your funds if you lose your seed phrase.</p>
   </div>
 
   <!-- ===== WALLET DASHBOARD ===== -->
-  <div id="walletDashboard" class="hidden mt-4">
-    <div class="glass flex-between">
-      <div><h2 class="text-3xl font-bold"><i class="fas fa-wallet"></i> My Wallet</h2></div>
-      <div class="flex gap-3 items-center">
-        <span id="walletAddressDisplay" class="font-mono text-base"></span>
-        <button id="copyAddressBtn" class="copy-btn" style="background:transparent;border:none;color:#94a3b8;cursor:pointer;"><i class="fas fa-copy fa-lg"></i></button>
-        <a id="bscScanLink" href="#" target="_blank" class="copy-btn" style="background:transparent;border:none;color:#94a3b8;cursor:pointer;"><i class="fas fa-external-link-alt fa-lg"></i></a>
-        <button id="kycBtn" class="btn-secondary"><i class="fas fa-id-card"></i> KYC</button>
-        <button id="lockBtn2" class="btn-secondary">Lock</button>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="nav-tabs mt-5">
-      <span class="nav-tab active" data-tab="walletTab"><i class="fas fa-chart-pie"></i> Wallet</span>
-      <span class="nav-tab" data-tab="merchantTab"><i class="fas fa-store"></i> Merchant</span>
-      <span class="nav-tab" data-tab="whitepaperTab"><i class="fas fa-file-pdf"></i> Whitepaper</span>
-      <span class="nav-tab" data-tab="kycTab"><i class="fas fa-id-card"></i> KYC</span>
-    </div>
-
-    <!-- Wallet Tab -->
-    <div id="walletTab" class="tab-content">
-      <div class="glass mt-4">
-        <div class="flex-between"><span class="text-xl">EFC Price Chart</span><span id="currentPriceDisplay" class="text-2xl font-bold">$0.00</span></div>
-        <div style="height:150px;"><canvas id="priceChart"></canvas></div>
-      </div>
-      <div class="glass mt-4">
-        <div class="flex-between"><span class="text-xl">Total Portfolio</span><span id="totalBalance" class="text-3xl font-bold">$0.00</span></div>
-        <div class="grid-3 mt-4" id="coinGrid"></div>
-      </div>
-      <div class="glass mt-4 flex gap-3">
-        <button id="refreshWalletBtn" class="btn-secondary"><i class="fas fa-sync-alt"></i> Refresh</button>
-        <button id="importTokenBtn" class="btn-secondary"><i class="fas fa-plus-circle"></i> Import Token</button>
-        <button id="claimAirdropBtn" class="btn-secondary"><i class="fas fa-gift"></i> Claim Airdrop</button>
-      </div>
-      <!-- Receive -->
-      <div class="glass mt-4">
-        <h3 class="text-2xl font-bold"><i class="fas fa-qrcode"></i> Receive</h3>
-        <div class="flex gap-3 items-center mt-2">
-          <span class="font-mono break-all" id="receiveAddress"></span>
-          <button onclick="copyAddress(document.getElementById('receiveAddress').innerText)" class="btn-secondary"><i class="fas fa-copy"></i> Copy</button>
-          <button onclick="openReceiveQR()" class="btn-secondary"><i class="fas fa-qrcode"></i> QR</button>
+  <div id="dashboard" style="display:none;">
+    <div class="glass">
+      <div class="flex-between">
+        <div><h2><i class="fas fa-wallet"></i> My Wallet</h2></div>
+        <div class="flex gap-2">
+          <span id="addressDisplay" class="font-mono text-sm"></span>
+          <button id="copyAddressBtn" class="copy-btn"><i class="fas fa-copy"></i></button>
+          <a id="bscLink" href="#" target="_blank" class="copy-btn"><i class="fas fa-external-link-alt"></i></a>
+          <button id="lockBtn" class="btn-secondary" style="width:auto;padding:0.4rem 1.2rem;">Lock</button>
         </div>
       </div>
-      <!-- History -->
-      <div class="glass mt-4">
-        <h3 class="text-2xl font-bold"><i class="fas fa-history"></i> Transaction History</h3>
-        <div id="txHistoryList" class="mt-3 text-lg"><p class="text-gray-400">No transactions yet.</p></div>
+      <div class="mt-3">
+        <p class="text-sm text-gray-400">Total Balance</p>
+        <p id="totalBalance" class="text-2xl font-bold">$0.00</p>
       </div>
-    </div>
-
-    <!-- Merchant Tab -->
-    <div id="merchantTab" class="tab-content hidden">
-      <div class="glass mt-4">
-        <h3 class="text-2xl font-bold"><i class="fas fa-store"></i> Merchant Dashboard</h3>
-        <p class="text-lg text-gray-400">Accept payments with EFC and other tokens.</p>
-        <div class="nav-tabs mt-3">
-          <span class="nav-tab active" data-merchant-tab="create">Create Request</span>
-          <span class="nav-tab" data-merchant-tab="pending">Pending</span>
-          <span class="nav-tab" data-merchant-tab="history">History</span>
-        </div>
-        <div id="merchantCreate" class="merchant-subtab">
-          <div class="grid-2 mt-3">
-            <div>
-              <label class="text-lg">Amount</label>
-              <input type="number" id="merchantAmount" class="input-field" placeholder="0.0">
-              <label class="text-lg mt-3">Currency</label>
-              <select id="merchantCurrency" class="input-field">
-                <option value="EFC">EFC</option><option value="BNB">BNB</option><option value="USDT">USDT</option><option value="ETH">ETH</option><option value="MATIC">MATIC</option>
-              </select>
-              <label class="text-lg mt-3">Description</label>
-              <input type="text" id="merchantDesc" class="input-field" placeholder="Product or service">
-              <button id="merchantGenerateBtn" class="btn-gold mt-3"><i class="fas fa-qrcode"></i> Generate Payment Request</button>
-            </div>
-            <div id="merchantQRContainer" class="text-center">
-              <p class="text-gray-400 text-lg">QR code will appear here.</p>
-              <div id="qrCodePlaceholder" class="mt-3"></div>
-              <p id="paymentLinkDisplay" class="text-lg break-all mt-3"></p>
-              <button id="copyPaymentLinkBtn" class="btn-secondary mt-3 hidden"><i class="fas fa-copy"></i> Copy Link</button>
-            </div>
-          </div>
-        </div>
-        <div id="merchantPending" class="merchant-subtab hidden">
-          <div id="pendingList" class="mt-3"><p class="text-gray-400">No pending requests.</p></div>
-        </div>
-        <div id="merchantHistory" class="merchant-subtab hidden">
-          <div id="merchantTxList" class="mt-3"><p class="text-gray-400">Loading...</p></div>
-        </div>
+      <div class="grid-2 mt-3" id="coinGrid"></div>
+      <div class="flex-between mt-3">
+        <button id="sendBtn" class="btn-primary" style="flex:1;margin-right:0.5rem;"><i class="fas fa-paper-plane"></i> Send</button>
+        <button id="receiveBtn" class="btn-secondary" style="flex:1;margin-left:0.5rem;"><i class="fas fa-qrcode"></i> Receive</button>
       </div>
-    </div>
-
-    <!-- Whitepaper Tab -->
-    <div id="whitepaperTab" class="tab-content hidden">
-      <div class="glass mt-4">
-        <h2 class="text-3xl font-bold">Efikcoin Whitepaper – Coin is Life</h2>
-        <div class="grid-2 mt-6">
-          <div>
-            <p><strong>Network:</strong> BNB Smart Chain (BEP-20)</p>
-            <p><strong>Contract:</strong> <span class="font-mono text-sm break-all">0x677ce9cba67f7484ea951a12897ce780cfd8fed1</span></p>
-            <p><strong>Treasury:</strong> <span class="font-mono text-sm break-all">0x676cCf34C191a9D6EFE4B265b84877C619A559d0</span></p>
-            <p><strong>LP Pair V2:</strong> <span class="font-mono text-sm break-all">0xa1DD6C528882Dc19EcCbC967F50bBC121A29630e</span></p>
-            <p><strong>Deployer:</strong> <span class="font-mono text-sm break-all">0xC5AD5cfcF81AD63a94227334b898eafCe6B27cCA</span></p>
-            <p><strong>BscScan:</strong> <a href="https://bscscan.com/token/0x677ce9cba67f7484ea951a12897ce780cfd8fed1" target="_blank" class="text-blue-400">View on BscScan</a></p>
-          </div>
-          <ul class="list-disc pl-5 text-lg">
-            <li>✓ Real‑World Payments</li>
-            <li>✓ Self‑Custodial Wallet</li>
-            <li>✓ Staking 14% APY</li>
-            <li>✓ Airdrop & Loyalty</li>
-            <li>✓ Charity Treasury (2%)</li>
-            <li>✓ Transparent & Audited</li>
-          </ul>
-        </div>
-        <div class="mt-6 text-center text-yellow-200 text-lg italic">"For this generation and the next — in love we build the good nation."</div>
-        <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="EFC NFT" style="width:120px; margin:2rem auto; display:block; border-radius:50%; border:2px solid #d4af37;">
-      </div>
-    </div>
-
-    <!-- KYC Tab -->
-    <div id="kycTab" class="tab-content hidden">
-      <div class="glass mt-4">
-        <h2 class="text-3xl font-bold"><i class="fas fa-id-card"></i> KYC Verification</h2>
-        <p class="text-lg text-gray-400">Verify your identity to unlock full wallet features and higher limits.</p>
-        <div id="kycStatus" class="mt-4 p-4 rounded-2xl" style="background:#1e293b;">
-          <div class="flex-between">
-            <span class="text-xl font-bold">Status:</span>
-            <span id="kycStatusText" class="text-xl font-bold" style="color:#facc15;">Pending</span>
-          </div>
-          <div class="flex-between mt-2">
-            <span>Verified Level:</span>
-            <span id="kycLevel" class="text-lg">Basic</span>
-          </div>
-        </div>
-        <div class="grid-2 mt-4">
-          <div>
-            <h3 class="text-xl font-bold">Personal Information</h3>
-            <input type="text" id="kycFullName" class="input-field mt-2" placeholder="Full Name">
-            <input type="date" id="kycDob" class="input-field mt-2" placeholder="Date of Birth">
-            <input type="text" id="kycAddress" class="input-field mt-2" placeholder="Residential Address">
-            <input type="text" id="kycCountry" class="input-field mt-2" placeholder="Country">
-          </div>
-          <div>
-            <h3 class="text-xl font-bold">Document Upload</h3>
-            <label class="text-sm">ID Type</label>
-            <select id="kycIdType" class="input-field mt-1">
-              <option value="passport">Passport</option>
-              <option value="drivers">Driver's License</option>
-              <option value="national">National ID</option>
-            </select>
-            <label class="text-sm mt-2">Upload ID</label>
-            <input type="file" id="kycFileUpload" class="input-field mt-1" accept="image/*,application/pdf">
-            <label class="text-sm mt-2">Selfie (optional)</label>
-            <input type="file" id="kycSelfie" class="input-field mt-1" accept="image/*">
-            <button id="kycSubmitBtn" class="btn-gold mt-3 w-full"><i class="fas fa-paper-plane"></i> Submit KYC</button>
-          </div>
-        </div>
-        <div class="mt-4 text-sm text-gray-400">
-          <p><i class="fas fa-shield-alt"></i> Your data is encrypted and submitted securely. We never share your information.</p>
-          <p class="mt-1"><i class="fas fa-clock"></i> Verification typically takes 5–15 minutes.</p>
-        </div>
+      <button id="refreshBtn" class="btn-secondary mt-2"><i class="fas fa-sync-alt"></i> Refresh</button>
+      <hr class="my-3" style="border-color:#1e293b;">
+      <div>
+        <h3><i class="fas fa-history"></i> History</h3>
+        <div id="historyList" class="mt-2"><p class="text-gray-400">No transactions.</p></div>
       </div>
     </div>
   </div>
 
-  <footer class="text-center text-gray-500 text-lg mt-10 border-t border-gray-800 pt-6">© 2025 Efikcoin – Decentralized for mankind. No data selling.</footer>
 </div>
 
 <script>
@@ -326,12 +122,8 @@ const FEE_PERCENT = 0.005;
 // =======================================================================
 let walletData = null;
 let balances = { bsc:{native:0, efc:0, usdt:0}, eth:{native:0, usdt:0}, polygon:{native:0}, btc:0 };
-let tokenContract = null, signer = null;
-let isUnlocked = false;
-let priceChartInstance = null;
 let customTokens = [];
-let merchantRequests = [];
-let kycStatus = 'pending'; // pending, verified, rejected
+let isUnlocked = false;
 
 // =======================================================================
 //                         HELPERS
@@ -371,7 +163,7 @@ async function getProvider() {
       await provider.getBlockNumber();
       return provider;
     } catch (e) {
-      console.warn(`RPC ${url} failed:`, e.message);
+      console.warn(`RPC ${url} failed`);
     }
   }
   throw new Error("All RPC endpoints failed");
@@ -410,7 +202,7 @@ function deriveBTCAddress(mnemonic) {
 }
 
 // =======================================================================
-//                         BALANCE & DATA FETCHING
+//                         BALANCES
 // =======================================================================
 async function loadBalances() {
   if (!walletData) return;
@@ -428,7 +220,7 @@ async function loadBalances() {
       efc: parseFloat(ethers.utils.formatUnits(efcBal, 18)),
       usdt: parseFloat(ethers.utils.formatUnits(usdtBal, usdtDec))
     };
-  } catch(e) { console.warn('Balance load error:', e); showToast('Error loading balances', true); }
+  } catch(e) { console.warn('Balance error', e); showToast('Error loading balances', true); }
   balances.eth = { native:0, usdt:0 }; balances.polygon = { native:0 };
   try {
     const btcAddr = deriveBTCAddress(walletData.mnemonic);
@@ -436,145 +228,68 @@ async function loadBalances() {
     const data = await resp.json();
     balances.btc = (data[btcAddr] || 0) / 1e8;
   } catch(e) {}
-  updateWalletUI();
+  updateUI();
 }
 
 // =======================================================================
-//                         PRICE CHART
+//                         UI UPDATE
 // =======================================================================
-async function updatePriceChart() {
-  try {
-    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${EFC_ADDRESS}`);
-    const data = await res.json();
-    if (data.pairs && data.pairs[0]) {
-      const price = parseFloat(data.pairs[0].priceUsd);
-      document.getElementById('efcPrice').innerText = '$' + price.toFixed(8);
-      document.getElementById('currentPriceDisplay').innerText = '$' + price.toFixed(8);
-      const base = price;
-      const labels = Array.from({length: 20}, (_,i) => i);
-      const values = labels.map(() => base * (0.98 + 0.04 * Math.random()));
-      if (priceChartInstance) priceChartInstance.destroy();
-      const ctx = document.getElementById('priceChart').getContext('2d');
-      priceChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: { labels, datasets: [{ label: 'EFC Price', data: values, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.2)', fill: true, tension: 0.4 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-      });
-    }
-  } catch(e) { console.warn('Price fetch error'); }
-}
-setInterval(updatePriceChart, 30000);
-
-// =======================================================================
-//                         UPDATE UI
-// =======================================================================
-function updateWalletUI() {
+function updateUI() {
   if (!walletData) return;
   const total = (balances.bsc.native * 300) + (balances.bsc.efc * 0.005) + (balances.bsc.usdt * 1) +
                 (balances.eth.native * 3000) + (balances.eth.usdt * 1) +
                 (balances.polygon.native * 1.5) + (balances.btc * 60000);
-  document.getElementById('totalBalance').innerText = '$' + total.toFixed(2);
-  document.getElementById('walletAddressDisplay').innerText = walletData.address.slice(0,8)+'...'+walletData.address.slice(-6);
-  document.getElementById('bscScanLink').href = `https://bscscan.com/address/${walletData.address}`;
-  document.getElementById('receiveAddress').innerText = walletData.address;
-  // Coin grid
+  $('totalBalance').innerText = '$' + total.toFixed(2);
+  $('addressDisplay').innerText = walletData.address.slice(0,6)+'...'+walletData.address.slice(-4);
+  $('bscLink').href = `https://bscscan.com/address/${walletData.address}`;
+
   const coins = [
-    { id:'bnb', label:'BNB', icon:'🔵', balance: balances.bsc.native, chain:'bsc', symbol:'BNB' },
-    { id:'eth', label:'ETH', icon:'⚡', balance: balances.eth.native, chain:'eth', symbol:'ETH' },
-    { id:'matic', label:'MATIC', icon:'🟣', balance: balances.polygon.native, chain:'polygon', symbol:'MATIC' },
-    { id:'btc', label:'BTC', icon:'₿', balance: balances.btc, chain:'btc', symbol:'BTC' },
-    { id:'efc', label:'EFC', icon:'🪙', balance: balances.bsc.efc, chain:'bsc', symbol:'EFC', contract:EFC_ADDRESS },
-    { id:'usdt', label:'USDT', icon:'💵', balance: balances.bsc.usdt + balances.eth.usdt, chain:'bsc', symbol:'USDT', contract:USDT_BSC }
+    { id:'bnb', label:'BNB', icon:'🔵', balance: balances.bsc.native, symbol:'BNB' },
+    { id:'eth', label:'ETH', icon:'⚡', balance: balances.eth.native, symbol:'ETH' },
+    { id:'matic', label:'MATIC', icon:'🟣', balance: balances.polygon.native, symbol:'MATIC' },
+    { id:'btc', label:'BTC', icon:'₿', balance: balances.btc, symbol:'BTC' },
+    { id:'efc', label:'EFC', icon:'🪙', balance: balances.bsc.efc, symbol:'EFC', contract:EFC_ADDRESS },
+    { id:'usdt', label:'USDT', icon:'💵', balance: balances.bsc.usdt + balances.eth.usdt, symbol:'USDT', contract:USDT_BSC }
   ];
   customTokens.forEach(t => {
     const bal = balances[t.chain] && balances[t.chain][t.symbol.toLowerCase()] ? balances[t.chain][t.symbol.toLowerCase()] : 0;
-    coins.push({ id:'custom_'+t.address, label:t.symbol, icon:'🔷', balance: bal, chain:t.chain, symbol:t.symbol, contract:t.address });
+    coins.push({ id:'custom_'+t.address, label:t.symbol, icon:'🔷', balance: bal, symbol:t.symbol, contract:t.address });
   });
+
   let html = '';
   coins.forEach(c => {
-    html += `<div class="coin-card" onclick="openCoinDashboard('${c.id}')">
-      <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" class="logo-bg" alt="">
+    html += `<div class="coin-card" onclick="openCoinDetail('${c.id}')">
       <div class="coin-icon">${c.icon}</div>
       <div class="font-bold">${c.label}</div>
       <div class="text-sm">${c.balance.toFixed(4)}</div>
-      <button class="btn-secondary mt-3">Manage</button>
     </div>`;
   });
-  document.getElementById('coinGrid').innerHTML = html;
-  loadTxHistory();
-  updateKYCUI();
+  $('coinGrid').innerHTML = html;
+  loadHistory();
 }
 
 // =======================================================================
-//                         TRANSACTION HISTORY
+//                         COIN DETAIL
 // =======================================================================
-async function loadTxHistory() {
-  if (!walletData) return;
-  const container = document.getElementById('txHistoryList');
-  container.innerHTML = 'Loading...';
-  try {
-    const provider = await getProvider();
-    const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, provider);
-    const filter = contract.filters.Transfer(null, walletData.address);
-    const events = await contract.queryFilter(filter, 0, 'latest');
-    let html = '';
-    if (events.length === 0) {
-      html = '<p class="text-gray-400">No incoming EFC transactions found.</p>';
-    } else {
-      const recent = events.slice(-10).reverse();
-      for (const ev of recent) {
-        const from = ev.args.from;
-        const value = ethers.utils.formatUnits(ev.args.value, 18);
-        const block = await provider.getBlock(ev.blockNumber);
-        const time = block ? new Date(block.timestamp*1000).toLocaleString() : 'Unknown';
-        html += `<div class="flex-between border-b border-gray-700 py-2">
-          <span><strong>+${parseFloat(value).toFixed(4)} EFC</strong> from ${from.slice(0,6)}...${from.slice(-4)}</span>
-          <span class="text-sm text-gray-400">${time}</span>
-          <a href="https://bscscan.com/tx/${ev.transactionHash}" target="_blank" class="text-blue-400"><i class="fas fa-external-link-alt"></i></a>
-        </div>`;
-      }
-    }
-    // Outgoing
-    const stored = JSON.parse(localStorage.getItem('efc_tx_history') || '[]');
-    if (stored.length > 0) {
-      html += '<div class="mt-2"><strong>Outgoing:</strong></div>';
-      stored.slice(0,5).forEach(tx => {
-        html += `<div class="flex-between border-b border-gray-700 py-2">
-          <span><strong>-${parseFloat(tx.amount).toFixed(4)} EFC</strong> to ${tx.to.slice(0,6)}...${tx.to.slice(-4)}</span>
-          <span class="text-sm text-gray-400">${tx.time}</span>
-          <a href="https://bscscan.com/tx/${tx.hash}" target="_blank" class="text-blue-400"><i class="fas fa-external-link-alt"></i></a>
-        </div>`;
-      });
-    }
-    container.innerHTML = html;
-  } catch(e) { container.innerHTML = '<p class="text-gray-400">Could not load history.</p>'; }
-}
-
-// =======================================================================
-//                         COIN DASHBOARD
-// =======================================================================
-function openCoinDashboard(coinId) {
+function openCoinDetail(coinId) {
   const allCoins = [
-    { id:'bnb', label:'BNB', icon:'🔵', balance: balances.bsc.native, chain:'bsc', symbol:'BNB', isNative:true },
-    { id:'eth', label:'ETH', icon:'⚡', balance: balances.eth.native, chain:'eth', symbol:'ETH', isNative:true },
-    { id:'matic', label:'MATIC', icon:'🟣', balance: balances.polygon.native, chain:'polygon', symbol:'MATIC', isNative:true },
-    { id:'btc', label:'BTC', icon:'₿', balance: balances.btc, chain:'btc', symbol:'BTC', isNative:true },
-    { id:'efc', label:'EFC', icon:'🪙', balance: balances.bsc.efc, chain:'bsc', symbol:'EFC', contract:EFC_ADDRESS, isErc:true },
-    { id:'usdt', label:'USDT', icon:'💵', balance: balances.bsc.usdt + balances.eth.usdt, chain:'bsc', symbol:'USDT', contract:USDT_BSC, isErc:true }
+    { id:'bnb', label:'BNB', balance: balances.bsc.native, symbol:'BNB', isNative:true },
+    { id:'eth', label:'ETH', balance: balances.eth.native, symbol:'ETH', isNative:true },
+    { id:'matic', label:'MATIC', balance: balances.polygon.native, symbol:'MATIC', isNative:true },
+    { id:'btc', label:'BTC', balance: balances.btc, symbol:'BTC', isNative:true },
+    { id:'efc', label:'EFC', balance: balances.bsc.efc, symbol:'EFC', contract:EFC_ADDRESS, isErc:true },
+    { id:'usdt', label:'USDT', balance: balances.bsc.usdt + balances.eth.usdt, symbol:'USDT', contract:USDT_BSC, isErc:true }
   ];
   customTokens.forEach(t => {
     const bal = balances[t.chain] && balances[t.chain][t.symbol.toLowerCase()] ? balances[t.chain][t.symbol.toLowerCase()] : 0;
-    allCoins.push({ id:'custom_'+t.address, label:t.symbol, icon:'🔷', balance: bal, chain:t.chain, symbol:t.symbol, contract:t.address, isErc:true });
+    allCoins.push({ id:'custom_'+t.address, label:t.symbol, balance: bal, symbol:t.symbol, contract:t.address, isErc:true });
   });
   const info = allCoins.find(c => c.id === coinId);
   if (!info) return;
 
   let actions = `
-    <button class="btn-primary" onclick="sendCoin('${info.chain}','${info.symbol}','${info.contract||''}')"><i class="fas fa-paper-plane"></i> Send</button>
-    <button class="btn-secondary" onclick="receiveCoin('${walletData.address}')"><i class="fas fa-qrcode"></i> Receive</button>
-    <button class="btn-secondary" onclick="buyCoin('${info.symbol}','${info.contract||''}')"><i class="fas fa-shopping-cart"></i> Buy</button>
-    <button class="btn-secondary" onclick="sellCoin('${info.symbol}','${info.contract||''}')"><i class="fas fa-arrow-up"></i> Sell</button>
-    <button class="btn-secondary" onclick="swapCoin('${info.symbol}','${info.contract||''}')"><i class="fas fa-exchange-alt"></i> Swap</button>
+    <button class="btn-primary" onclick="sendCoin('${info.contract||''}','${info.symbol}')"><i class="fas fa-paper-plane"></i> Send</button>
+    <button class="btn-secondary" onclick="receiveCoin()"><i class="fas fa-qrcode"></i> Receive</button>
     <button class="btn-secondary" onclick="copyAddress('${walletData.address}')"><i class="fas fa-copy"></i> Copy</button>
     <a href="https://bscscan.com/address/${walletData.address}" target="_blank" class="btn-secondary"><i class="fas fa-external-link-alt"></i> BscScan</a>
   `;
@@ -585,155 +300,78 @@ function openCoinDashboard(coinId) {
       <button class="btn-secondary" onclick="claimRewardsEFC()"><i class="fas fa-gift"></i> Claim</button>
     `;
   }
-  const modalHtml = `
-    <h3 class="text-3xl font-bold">${info.icon} ${info.label} Dashboard</h3>
-    <div class="mt-2 text-xl">Balance: <strong>${info.balance.toFixed(6)} ${info.symbol}</strong></div>
-    <div style="height:80px; margin:1rem 0;">
-      <canvas id="coinChart"></canvas>
-    </div>
-    <div class="flex flex-wrap gap-3 mt-4">${actions}</div>
-    <div class="mt-4 text-sm text-gray-400">Address: <span class="font-mono break-all">${walletData.address}</span></div>
-    <button onclick="closeModal()" class="btn-secondary mt-4">Close</button>
-  `;
-  openModal(modalHtml);
-  setTimeout(() => {
-    const ctx = document.getElementById('coinChart');
-    if (ctx) {
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['1h','2h','3h','4h','5h','6h'],
-          datasets: [{ label: 'Price', data: [0.005,0.006,0.0055,0.007,0.0065,0.008], borderColor: '#8b5cf6', tension: 0.4 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
-    }
-  }, 100);
-}
 
-// =======================================================================
-//                         SEND / RECEIVE / BUY / SELL / SWAP
-// =======================================================================
-async function sendCoin(chain, symbol, contractAddress) {
-  if (!walletData) { showToast('Unlock wallet first', true); return; }
-  if (kycStatus !== 'verified') {
-    showToast('Please complete KYC verification first', true);
-    return;
-  }
-  try {
-    const provider = await getProvider();
-    const signerObj = new ethers.Wallet(walletData.privateKey, provider);
-    let tokenContractObj = null;
-    if (contractAddress) {
-      tokenContractObj = new ethers.Contract(contractAddress, EFC_ABI, signerObj);
-    }
-    openModal(`
-      <h3>Send ${symbol}</h3>
-      <input type="text" id="sendToAddr" class="input-field mt-2" placeholder="Recipient address">
-      <input type="number" id="sendAmountVal" class="input-field mt-2" placeholder="Amount">
-      <button id="sendConfirmBtn" class="btn-primary mt-2">Confirm Send</button>
-      <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
-    `);
-    document.getElementById('sendConfirmBtn').onclick = async () => {
-      const to = document.getElementById('sendToAddr').value;
-      const amount = document.getElementById('sendAmountVal').value;
-      if (!ethers.utils.isAddress(to)) { showToast('Invalid address', true); return; }
-      if (!amount || parseFloat(amount)<=0) { showToast('Invalid amount', true); return; }
-      try {
-        let feeAmount = 0, finalAmount = parseFloat(amount);
-        if (contractAddress && contractAddress.toLowerCase() === EFC_ADDRESS.toLowerCase()) {
-          feeAmount = finalAmount * FEE_PERCENT;
-          finalAmount = finalAmount - feeAmount;
-          const feeParsed = ethers.utils.parseUnits(feeAmount.toString(), 18);
-          const txFee = await tokenContractObj.transfer(TREASURY_ADDRESS, feeParsed);
-          await txFee.wait();
-        }
-        const parsed = ethers.utils.parseUnits(finalAmount.toString(), 18);
-        let tx;
-        if (tokenContractObj) {
-          tx = await tokenContractObj.transfer(to, parsed);
-        } else {
-          const parsedNative = ethers.utils.parseEther(finalAmount.toString());
-          tx = await signerObj.sendTransaction({ to, value: parsedNative, gasLimit: 21000 });
-        }
-        showToast('Sending...');
-        await tx.wait();
-        showToast(`Sent ${finalAmount} ${symbol} successfully!`);
-        const hist = JSON.parse(localStorage.getItem('efc_tx_history') || '[]');
-        hist.unshift({ to, amount: finalAmount, symbol, hash: tx.hash, time: new Date().toLocaleString() });
-        localStorage.setItem('efc_tx_history', JSON.stringify(hist.slice(0,20)));
-        closeModal();
-        loadBalances();
-      } catch(e) { showToast('Send failed: '+e.message.slice(0,80), true); }
-    };
-  } catch(e) { showToast('Provider error: '+e.message, true); }
-}
-
-function receiveCoin(addr) {
   openModal(`
-    <h3>Receive</h3>
-    <div class="font-mono break-all bg-gray-800 p-2 rounded-xl">${addr}</div>
-    <div id="qrContainer" class="mt-2"></div>
-    <button class="btn-secondary mt-2" onclick="copyAddress('${addr}')"><i class="fas fa-copy"></i> Copy</button>
-    <a href="https://bscscan.com/address/${addr}" target="_blank" class="btn-secondary mt-2">BscScan</a>
-    <button onclick="closeModal()" class="btn-secondary mt-2">Close</button>
+    <h3>${info.label} Dashboard</h3>
+    <p>Balance: <strong>${info.balance.toFixed(6)} ${info.symbol}</strong></p>
+    <div class="flex flex-wrap gap-2 mt-3">${actions}</div>
+    <button onclick="closeModal()" class="btn-secondary mt-3">Close</button>
   `);
-  new QRCode(document.getElementById('qrContainer'), { text: addr, width: 200, height: 200 });
-}
-function openReceiveQR() { if (walletData) receiveCoin(walletData.address); }
-
-function buyCoin(symbol, contract) {
-  let url = 'https://pancakeswap.finance/swap?';
-  if (contract) url += `outputCurrency=${contract}`;
-  else url += `outputCurrency=${symbol}`;
-  window.open(url, '_blank');
-}
-function sellCoin(symbol, contract) {
-  let url = 'https://pancakeswap.finance/swap?';
-  if (contract) url += `inputCurrency=${contract}`;
-  else url += `inputCurrency=${symbol}`;
-  window.open(url, '_blank');
-}
-function swapCoin(symbol, contract) {
-  let url = 'https://app.1inch.io/#/56/swap/';
-  if (contract) url += contract;
-  else url += symbol;
-  window.open(url, '_blank');
 }
 
 // =======================================================================
-//                         STAKING
+//                         SEND
 // =======================================================================
-async function stakeEFC() {
+async function sendCoin(contract, symbol) {
   if (!walletData) { showToast('Unlock first', true); return; }
-  if (kycStatus !== 'verified') { showToast('Complete KYC first', true); return; }
   openModal(`
-    <h3>Stake EFC</h3>
-    <input type="number" id="stakeAmountInput" class="input-field mt-2" placeholder="Amount to stake">
-    <button id="stakeConfirmBtn" class="btn-primary mt-2">Confirm Stake</button>
+    <h3>Send ${symbol}</h3>
+    <input type="text" id="sendTo" class="input-field mt-2" placeholder="Recipient address">
+    <input type="number" id="sendAmount" class="input-field mt-2" placeholder="Amount">
+    <button id="sendConfirm" class="btn-primary mt-2">Confirm Send</button>
     <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
   `);
-  document.getElementById('stakeConfirmBtn').onclick = async () => {
-    const amt = document.getElementById('stakeAmountInput').value;
-    if (!amt || parseFloat(amt)<=0) { showToast('Invalid amount', true); return; }
+  $('sendConfirm').onclick = async () => {
+    const to = $('sendTo').value;
+    const amount = $('sendAmount').value;
+    if (!ethers.utils.isAddress(to)) { showToast('Invalid address', true); return; }
+    if (!amount || parseFloat(amount)<=0) { showToast('Invalid amount', true); return; }
     try {
       const provider = await getProvider();
       const signerObj = new ethers.Wallet(walletData.privateKey, provider);
-      const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signerObj);
-      const parsed = ethers.utils.parseUnits(amt, 18);
-      const approve = await contract.approve(EFC_ADDRESS, parsed);
-      await approve.wait();
-      const tx = await contract.deposit(parsed);
-      showToast('Staking...');
+      let tokenContractObj = null;
+      if (contract) {
+        tokenContractObj = new ethers.Contract(contract, EFC_ABI, signerObj);
+      }
+      let feeAmount = 0, finalAmount = parseFloat(amount);
+      if (contract && contract.toLowerCase() === EFC_ADDRESS.toLowerCase()) {
+        feeAmount = finalAmount * FEE_PERCENT;
+        finalAmount = finalAmount - feeAmount;
+        const feeParsed = ethers.utils.parseUnits(feeAmount.toString(), 18);
+        const txFee = await tokenContractObj.transfer(TREASURY_ADDRESS, feeParsed);
+        await txFee.wait();
+      }
+      const parsed = ethers.utils.parseUnits(finalAmount.toString(), 18);
+      let tx;
+      if (tokenContractObj) {
+        tx = await tokenContractObj.transfer(to, parsed);
+      } else {
+        const parsedNative = ethers.utils.parseEther(finalAmount.toString());
+        tx = await signerObj.sendTransaction({ to, value: parsedNative, gasLimit: 21000 });
+      }
+      showToast('Sending...');
       await tx.wait();
-      showToast('Staked successfully!');
+      showToast(`Sent ${finalAmount} ${symbol} successfully!`);
       closeModal();
       loadBalances();
-    } catch(e) { showToast('Stake failed: '+e.message.slice(0,80), true); }
+    } catch(e) { showToast('Send failed: '+e.message.slice(0,80), true); }
   };
 }
-async function unstakeEFC() { /* similar */ }
-async function claimRewardsEFC() { /* similar */ }
+
+// =======================================================================
+//                         RECEIVE
+// =======================================================================
+function receiveCoin() {
+  if (!walletData) return;
+  openModal(`
+    <h3>Receive</h3>
+    <div class="font-mono break-all bg-gray-800 p-2 rounded-xl">${walletData.address}</div>
+    <div id="qrContainer" class="mt-2"></div>
+    <button class="btn-secondary mt-2" onclick="copyAddress('${walletData.address}')"><i class="fas fa-copy"></i> Copy</button>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Close</button>
+  `);
+  new QRCode(document.getElementById('qrContainer'), { text: walletData.address, width: 200, height: 200 });
+}
 
 // =======================================================================
 //                         COPY
@@ -747,258 +385,97 @@ function copyAddress(addr) {
     showToast('Address copied!');
   }
 }
-document.getElementById('copyAddressBtn').onclick = () => { if(walletData) copyAddress(walletData.address); };
+$('copyAddressBtn').onclick = () => { if(walletData) copyAddress(walletData.address); };
 
 // =======================================================================
-//                         IMPORT TOKEN
+//                         STAKING (EFC)
 // =======================================================================
-document.getElementById('importTokenBtn').onclick = () => {
-  if (!walletData) { showToast('Unlock wallet first', true); return; }
+async function stakeEFC() {
+  if (!walletData) { showToast('Unlock first', true); return; }
   openModal(`
-    <h3>Import Custom Token</h3>
-    <input type="text" id="tokenAddressInput" class="input-field mt-2" placeholder="Token contract address">
-    <input type="text" id="tokenSymbolInput" class="input-field mt-2" placeholder="Token symbol (e.g., PEPE)">
-    <button id="importTokenConfirm" class="btn-primary mt-2">Import</button>
+    <h3>Stake EFC</h3>
+    <input type="number" id="stakeAmount" class="input-field mt-2" placeholder="Amount">
+    <button id="stakeConfirm" class="btn-primary mt-2">Confirm</button>
     <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
   `);
-  document.getElementById('importTokenConfirm').onclick = async () => {
-    const addr = document.getElementById('tokenAddressInput').value.trim();
-    const sym = document.getElementById('tokenSymbolInput').value.trim().toUpperCase();
-    if (!ethers.utils.isAddress(addr)) { showToast('Invalid address', true); return; }
-    if (!sym) { showToast('Enter symbol', true); return; }
-    customTokens.push({ address: addr, symbol: sym, decimals: 18, chain: 'bsc' });
-    showToast('Token imported!');
-    closeModal();
-    loadBalances();
+  $('stakeConfirm').onclick = async () => {
+    const amt = $('stakeAmount').value;
+    if (!amt || parseFloat(amt)<=0) { showToast('Invalid amount', true); return; }
+    try {
+      const provider = await getProvider();
+      const signerObj = new ethers.Wallet(walletData.privateKey, provider);
+      const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signerObj);
+      const parsed = ethers.utils.parseUnits(amt, 18);
+      const approve = await contract.approve(EFC_ADDRESS, parsed);
+      await approve.wait();
+      const tx = await contract.deposit(parsed);
+      showToast('Staking...');
+      await tx.wait();
+      showToast('Staked!');
+      closeModal();
+      loadBalances();
+    } catch(e) { showToast('Stake failed: '+e.message.slice(0,80), true); }
   };
-};
-
-// =======================================================================
-//                         AIRDROP
-// =======================================================================
-document.getElementById('claimAirdropBtn').onclick = async () => {
-  if (!walletData) { showToast('Unlock wallet', true); return; }
-  if (kycStatus !== 'verified') { showToast('Complete KYC first', true); return; }
+}
+async function unstakeEFC() {
+  if (!walletData) { showToast('Unlock first', true); return; }
+  openModal(`
+    <h3>Unstake EFC</h3>
+    <input type="number" id="unstakeAmount" class="input-field mt-2" placeholder="Amount">
+    <button id="unstakeConfirm" class="btn-primary mt-2">Confirm</button>
+    <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
+  `);
+  $('unstakeConfirm').onclick = async () => {
+    const amt = $('unstakeAmount').value;
+    if (!amt || parseFloat(amt)<=0) { showToast('Invalid amount', true); return; }
+    try {
+      const provider = await getProvider();
+      const signerObj = new ethers.Wallet(walletData.privateKey, provider);
+      const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signerObj);
+      const parsed = ethers.utils.parseUnits(amt, 18);
+      const tx = await contract.withdraw(parsed);
+      showToast('Unstaking...');
+      await tx.wait();
+      showToast('Unstaked!');
+      closeModal();
+      loadBalances();
+    } catch(e) { showToast('Unstake failed: '+e.message.slice(0,80), true); }
+  };
+}
+async function claimRewardsEFC() {
+  if (!walletData) { showToast('Unlock first', true); return; }
   try {
     const provider = await getProvider();
     const signerObj = new ethers.Wallet(walletData.privateKey, provider);
     const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, signerObj);
     const tx = await contract.claimRewards();
-    showToast('Claiming airdrop...');
+    showToast('Claiming...');
     await tx.wait();
-    showToast('Airdrop claimed!');
+    showToast('Rewards claimed!');
     loadBalances();
-  } catch(e) { showToast('Airdrop not available: '+e.message.slice(0,80), true); }
-};
+  } catch(e) { showToast('Claim failed: '+e.message.slice(0,80), true); }
+}
 
 // =======================================================================
-//                         MERCHANT
+//                         HISTORY
 // =======================================================================
-function loadMerchantRequests() {
-  const stored = localStorage.getItem('efc_merchant_requests');
-  merchantRequests = stored ? JSON.parse(stored) : [];
-}
-function saveMerchantRequests() {
-  localStorage.setItem('efc_merchant_requests', JSON.stringify(merchantRequests));
-}
-function generatePaymentRequest() {
-  const amount = document.getElementById('merchantAmount').value;
-  const currency = document.getElementById('merchantCurrency').value;
-  const desc = document.getElementById('merchantDesc').value || 'Payment';
-  if (!amount || parseFloat(amount)<=0) { showToast('Enter valid amount', true); return; }
-  if (!walletData) { showToast('Unlock wallet first', true); return; }
-  const request = {
-    id: Date.now().toString(),
-    amount: parseFloat(amount),
-    currency,
-    description: desc,
-    address: walletData.address,
-    timestamp: new Date().toISOString(),
-    status: 'pending',
-    txHash: null
-  };
-  merchantRequests.push(request);
-  saveMerchantRequests();
-  const paymentData = `${walletData.address}?amount=${amount}&currency=${currency}&memo=${encodeURIComponent(desc)}`;
-  const qrContainer = document.getElementById('qrCodePlaceholder');
-  qrContainer.innerHTML = '';
-  new QRCode(qrContainer, { text: paymentData, width: 180, height: 180 });
-  document.getElementById('paymentLinkDisplay').innerHTML = `Payment link: <span class="font-mono text-xs break-all">${paymentData}</span>`;
-  document.getElementById('copyPaymentLinkBtn').classList.remove('hidden');
-  showToast('Payment request generated!');
-  renderPendingRequests();
-}
-document.getElementById('merchantGenerateBtn')?.addEventListener('click', generatePaymentRequest);
-document.getElementById('copyPaymentLinkBtn')?.addEventListener('click', () => {
-  const link = document.getElementById('paymentLinkDisplay').innerText.replace('Payment link: ', '');
-  copyAddress(link);
-});
-
-function renderPendingRequests() {
-  const pending = merchantRequests.filter(r => r.status === 'pending');
-  const container = document.getElementById('pendingList');
-  if (pending.length === 0) { container.innerHTML = '<p class="text-gray-400">No pending requests.</p>'; return; }
+function loadHistory() {
+  const container = $('historyList');
+  const stored = JSON.parse(localStorage.getItem('efc_tx_history') || '[]');
+  if (stored.length === 0) {
+    container.innerHTML = '<p class="text-gray-400">No transactions.</p>';
+    return;
+  }
   let html = '';
-  pending.forEach(r => {
-    html += `
-      <div class="merchant-request flex-between">
-        <div><strong>${r.amount} ${r.currency}</strong> – ${r.description}<br><span class="text-sm text-gray-400">${new Date(r.timestamp).toLocaleString()}</span> <span class="badge">Pending</span></div>
-        <div><button class="btn-secondary text-xs" onclick="checkPayment('${r.id}')"><i class="fas fa-check"></i> Check</button>
-        <button class="btn-secondary text-xs" onclick="deleteRequest('${r.id}')"><i class="fas fa-trash"></i></button></div>
-      </div>
-    `;
+  stored.slice(0,10).forEach(tx => {
+    html += `<div class="history-item">
+      <span><strong>${tx.symbol}</strong> ${parseFloat(tx.amount).toFixed(4)}</span>
+      <span class="text-sm text-gray-400">${tx.time}</span>
+      <a href="https://bscscan.com/tx/${tx.hash}" target="_blank" class="text-blue-400"><i class="fas fa-external-link-alt"></i></a>
+    </div>`;
   });
   container.innerHTML = html;
 }
-
-async function checkPayment(requestId) {
-  const request = merchantRequests.find(r => r.id === requestId);
-  if (!request) return showToast('Request not found', true);
-  if (request.currency === 'EFC') {
-    try {
-      const provider = await getProvider();
-      const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, provider);
-      const balance = await contract.balanceOf(walletData.address);
-      const formatted = parseFloat(ethers.utils.formatUnits(balance, 18));
-      if (formatted >= request.amount) {
-        request.status = 'completed';
-        saveMerchantRequests();
-        showToast('Payment received! ✅');
-        renderPendingRequests();
-        loadBalances();
-      } else {
-        showToast(`Balance: ${formatted} EFC (need ${request.amount})`);
-      }
-    } catch(e) { showToast('Error checking', true); }
-  } else {
-    showToast('Auto‑check only for EFC for now.', true);
-  }
-}
-function deleteRequest(requestId) {
-  if (confirm('Delete this request?')) {
-    merchantRequests = merchantRequests.filter(r => r.id !== requestId);
-    saveMerchantRequests();
-    renderPendingRequests();
-  }
-}
-
-async function loadMerchantHistory() {
-  const container = document.getElementById('merchantTxList');
-  container.innerHTML = 'Loading...';
-  try {
-    const provider = await getProvider();
-    const contract = new ethers.Contract(EFC_ADDRESS, EFC_ABI, provider);
-    const filter = contract.filters.Transfer(null, walletData.address);
-    const events = await contract.queryFilter(filter, 0, 'latest');
-    if (events.length === 0) { container.innerHTML = '<p class="text-gray-400">No incoming transactions found.</p>'; return; }
-    let html = '';
-    const recent = events.slice(-15).reverse();
-    for (const ev of recent) {
-      const from = ev.args.from;
-      const value = ethers.utils.formatUnits(ev.args.value, 18);
-      const block = await provider.getBlock(ev.blockNumber);
-      const time = block ? new Date(block.timestamp*1000).toLocaleString() : 'Unknown';
-      html += `<div class="merchant-request flex-between">
-        <div><strong>+${parseFloat(value).toFixed(4)} EFC</strong> from ${from.slice(0,6)}...${from.slice(-4)}</div>
-        <span class="text-sm text-gray-400">${time}</span>
-        <a href="https://bscscan.com/tx/${ev.transactionHash}" target="_blank" class="text-blue-400"><i class="fas fa-external-link-alt"></i></a>
-      </div>`;
-    }
-    container.innerHTML = html;
-  } catch(e) { container.innerHTML = '<p class="text-gray-400">Could not load history.</p>'; }
-}
-
-// =======================================================================
-//                         KYC MODULE
-// =======================================================================
-function updateKYCUI() {
-  const badge = document.getElementById('kycStatusBadge');
-  const statusText = document.getElementById('kycStatusText');
-  const level = document.getElementById('kycLevel');
-  if (kycStatus === 'verified') {
-    badge.className = 'badge kyc-verified';
-    badge.style.background = '#22c55e';
-    badge.innerText = 'KYC: Verified';
-    statusText.innerText = 'Verified';
-    statusText.style.color = '#22c55e';
-    level.innerText = 'Full';
-  } else if (kycStatus === 'pending') {
-    badge.className = 'badge kyc-pending';
-    badge.style.background = '#facc15';
-    badge.innerText = 'KYC: Pending';
-    statusText.innerText = 'Pending';
-    statusText.style.color = '#facc15';
-    level.innerText = 'Basic';
-  } else {
-    badge.className = 'badge';
-    badge.style.background = '#ef4444';
-    badge.innerText = 'KYC: Rejected';
-    statusText.innerText = 'Rejected';
-    statusText.style.color = '#ef4444';
-    level.innerText = 'None';
-  }
-}
-
-document.getElementById('kycSubmitBtn').addEventListener('click', function() {
-  const name = document.getElementById('kycFullName').value.trim();
-  const dob = document.getElementById('kycDob').value;
-  const address = document.getElementById('kycAddress').value.trim();
-  const country = document.getElementById('kycCountry').value.trim();
-  const idType = document.getElementById('kycIdType').value;
-  const file = document.getElementById('kycFileUpload').files[0];
-  if (!name || !dob || !address || !country || !file) {
-    showToast('Please fill all required fields and upload ID', true);
-    return;
-  }
-  // Simulate KYC submission
-  showToast('Submitting KYC... Please wait.');
-  // In a real implementation, you would send this data to a backend.
-  // Here we simulate verification after 5 seconds.
-  setTimeout(() => {
-    kycStatus = 'verified';
-    updateKYCUI();
-    showToast('KYC Verification Successful! 🎉');
-    // Save KYC status in localStorage
-    localStorage.setItem('efc_kyc_status', 'verified');
-  }, 5000);
-});
-
-// Load KYC status from localStorage
-if (localStorage.getItem('efc_kyc_status') === 'verified') {
-  kycStatus = 'verified';
-} else {
-  kycStatus = 'pending';
-}
-updateKYCUI();
-
-// =======================================================================
-//                         TABS
-// =======================================================================
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    const target = this.dataset.tab;
-    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
-    document.getElementById(target).classList.remove('hidden');
-    if (target === 'merchantTab') {
-      loadMerchantRequests();
-      renderPendingRequests();
-      loadMerchantHistory();
-    }
-  });
-});
-document.querySelectorAll('[data-merchant-tab]').forEach(tab => {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('[data-merchant-tab]').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-    const target = this.dataset.merchantTab;
-    document.querySelectorAll('.merchant-subtab').forEach(st => st.classList.add('hidden'));
-    document.getElementById('merchant'+target.charAt(0).toUpperCase()+target.slice(1)).classList.remove('hidden');
-    if (target === 'pending') renderPendingRequests();
-    if (target === 'history') loadMerchantHistory();
-  });
-});
 
 // =======================================================================
 //                         UNLOCK / CONNECT
@@ -1008,17 +485,10 @@ function unlockAndConnect(password) {
   if (!result) { showToast('Wrong password', true); return false; }
   walletData = result;
   isUnlocked = true;
-  document.getElementById('welcomeScreen').style.display = 'none';
-  document.getElementById('landingPage').style.display = 'none';
-  document.getElementById('walletDashboard').classList.remove('hidden');
-  document.getElementById('lockBtn').classList.remove('hidden');
-  document.getElementById('lockBtn2').classList.remove('hidden');
-  document.getElementById('statusBadge').innerText = 'Connected';
-  document.getElementById('statusBadge').style.background = '#22c55e';
-  document.getElementById('connectBtn').innerHTML = '<i class="fas fa-check"></i> Unlocked';
+  $('welcomeScreen').style.display = 'none';
+  $('dashboard').style.display = 'block';
+  $('lockBtn').style.display = 'inline-block';
   loadBalances();
-  updatePriceChart();
-  loadMerchantRequests();
   if (window._balanceInterval) clearInterval(window._balanceInterval);
   window._balanceInterval = setInterval(() => { if (isUnlocked) loadBalances(); }, 15000);
   return true;
@@ -1028,52 +498,27 @@ function lockWallet() {
   isUnlocked = false;
   walletData = null;
   if (window._balanceInterval) clearInterval(window._balanceInterval);
-  document.getElementById('welcomeScreen').style.display = 'flex';
-  document.getElementById('landingPage').style.display = 'block';
-  document.getElementById('walletDashboard').classList.add('hidden');
-  document.getElementById('lockBtn').classList.add('hidden');
-  document.getElementById('lockBtn2').classList.add('hidden');
-  document.getElementById('statusBadge').innerText = 'Locked';
-  document.getElementById('statusBadge').style.background = '#ef4444';
-  document.getElementById('connectBtn').innerHTML = '<i class="fas fa-wallet"></i> Launch';
+  $('welcomeScreen').style.display = 'flex';
+  $('dashboard').style.display = 'none';
+  $('lockBtn').style.display = 'none';
   showToast('Wallet locked');
 }
 
 // =======================================================================
 //                         EVENT BINDINGS
 // =======================================================================
-document.getElementById('connectBtn').onclick = () => {
-  if (localStorage.getItem('efc_wallet_encrypted')) {
-    openModal(`
-      <h3>Enter Password</h3>
-      <input type="password" id="unlockPw" class="input-field mt-2" placeholder="Password">
-      <button id="unlockConfirmBtn" class="btn-primary mt-2">Unlock</button>
-      <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
-    `);
-    document.getElementById('unlockConfirmBtn').onclick = () => {
-      const pw = document.getElementById('unlockPw').value;
-      if (unlockAndConnect(pw)) { closeModal(); }
-    };
-  } else {
-    document.getElementById('welcomeCreate').click();
-  }
-};
-document.getElementById('lockBtn').onclick = lockWallet;
-document.getElementById('lockBtn2').onclick = lockWallet;
-document.getElementById('refreshWalletBtn').onclick = () => { if(isUnlocked) { loadBalances(); showToast('Refreshed'); } };
-
-document.getElementById('welcomeCreate').onclick = () => {
+$('welcomeCreate').onclick = () => {
   openModal(`
     <h3>Create New Wallet</h3>
     <p>Set a password to encrypt your seed phrase.</p>
     <input type="password" id="newPw1" class="input-field mt-2" placeholder="Password">
     <input type="password" id="newPw2" class="input-field mt-2" placeholder="Confirm password">
-    <button id="createConfirmBtn" class="btn-gold mt-2">Generate</button>
+    <button id="createConfirm" class="btn-gold mt-2">Generate</button>
     <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
   `);
-  document.getElementById('createConfirmBtn').onclick = () => {
-    const pw1 = document.getElementById('newPw1').value;
-    const pw2 = document.getElementById('newPw2').value;
+  $('createConfirm').onclick = () => {
+    const pw1 = $('newPw1').value;
+    const pw2 = $('newPw2').value;
     if (!pw1 || pw1.length<4) { showToast('Password min 4 chars', true); return; }
     if (pw1 !== pw2) { showToast('Passwords do not match', true); return; }
     const result = createNewWallet(pw1);
@@ -1082,18 +527,19 @@ document.getElementById('welcomeCreate').onclick = () => {
     unlockAndConnect(pw1);
   };
 };
-document.getElementById('welcomeImport').onclick = () => {
+
+$('welcomeImport').onclick = () => {
   openModal(`
     <h3>Import Wallet</h3>
     <p>Enter your 12‑word recovery phrase.</p>
     <textarea id="importMnemonic" class="input-field mt-2" rows="3" placeholder="word1 word2 ... word12"></textarea>
     <input type="password" id="importPassword" class="input-field mt-2" placeholder="Set a password to encrypt">
-    <button id="importConfirmBtn" class="btn-primary mt-2">Import</button>
+    <button id="importConfirm" class="btn-primary mt-2">Import</button>
     <button onclick="closeModal()" class="btn-secondary mt-2">Cancel</button>
   `);
-  document.getElementById('importConfirmBtn').onclick = () => {
-    const mnemonic = document.getElementById('importMnemonic').value.trim();
-    const pw = document.getElementById('importPassword').value;
+  $('importConfirm').onclick = () => {
+    const mnemonic = $('importMnemonic').value.trim();
+    const pw = $('importPassword').value;
     if (!mnemonic || mnemonic.split(' ').length < 12) { showToast('Invalid mnemonic', true); return; }
     if (!pw || pw.length<4) { showToast('Password required', true); return; }
     try {
@@ -1108,43 +554,23 @@ document.getElementById('welcomeImport').onclick = () => {
   };
 };
 
-// KYC Button (opens KYC tab)
-document.getElementById('kycBtn').addEventListener('click', function() {
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
-  document.querySelector('[data-tab="kycTab"]').classList.add('active');
-  document.getElementById('kycTab').classList.remove('hidden');
-});
-
-// =======================================================================
-//                         CHARITY BACKGROUND
-// =======================================================================
-const charityImgs = [
-  'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200',
-  'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=1200',
-  'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200'
-];
-let idx=0;
-setInterval(() => {
-  idx = (idx+1) % charityImgs.length;
-  document.getElementById('charityBg').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5)), url('${charityImgs[idx]}')`;
-}, 7000);
+$('lockBtn').onclick = lockWallet;
+$('refreshBtn').onclick = () => { if(isUnlocked) { loadBalances(); showToast('Refreshed'); } };
+$('sendBtn').onclick = () => { if(walletData) sendCoin(EFC_ADDRESS, 'EFC'); };
+$('receiveBtn').onclick = () => { if(walletData) receiveCoin(); };
 
 // =======================================================================
 //                         INIT
 // =======================================================================
 if (localStorage.getItem('efc_wallet_encrypted')) {
-  document.getElementById('welcomeScreen').style.display = 'flex';
-  document.getElementById('landingPage').style.display = 'block';
-  document.getElementById('statusBadge').innerText = 'Locked';
-  document.getElementById('statusBadge').style.background = '#ef4444';
+  $('welcomeScreen').style.display = 'flex';
+  $('dashboard').style.display = 'none';
+  $('lockBtn').style.display = 'none';
 } else {
-  document.getElementById('welcomeScreen').style.display = 'flex';
-  document.getElementById('landingPage').style.display = 'block';
-  document.getElementById('statusBadge').innerText = 'No wallet';
-  document.getElementById('statusBadge').style.background = '#6b7280';
+  $('welcomeScreen').style.display = 'flex';
+  $('dashboard').style.display = 'none';
+  $('lockBtn').style.display = 'none';
 }
-updatePriceChart();
 </script>
 </body>
 </html>
