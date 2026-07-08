@@ -1,6 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><!-- ===== STATUS BAR ===== -->
+<div id="statusBar" style="
+  background: rgba(15,23,42,0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(148,163,184,0.2);
+  border-radius: 3rem;
+  padding: 0.6rem 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+">
+  <span id="statusNetwork" style="display:flex;align-items:center;gap:0.5rem;">
+    <i class="fas fa-circle" style="color:#22c55e;font-size:0.7rem;"></i>
+    <span>BSC Mainnet</span>
+  </span>
+  <span id="statusWallet" style="display:flex;align-items:center;gap:0.5rem;">
+    <i class="fas fa-lock" style="color:#facc15;"></i>
+    <span id="statusWalletText">Locked</span>
+  </span>
+  <span id="statusSync" style="display:flex;align-items:center;gap:0.5rem;">
+    <i class="fas fa-sync-alt fa-spin" style="color:#8b5cf6;"></i>
+    <span id="statusSyncText">Synced</span>
+  </span>
+  <span id="statusTx" style="display:flex;align-items:center;gap:0.5rem;">
+    <i class="fas fa-check-circle" style="color:#22c55e;"></i>
+    <span id="statusTxText">Ready</span>
+  </span>
+</div>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0c12">
@@ -8,7 +38,51 @@
   <link rel="icon" href="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" type="image/png">
   <!-- Google Translate -->
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-  <script>
+  <script>// ===== STATUS UPDATES =====
+function setStatus(component, text, iconClass, color) {
+  const map = {
+    network: { el: document.getElementById('statusNetwork'), textEl: document.querySelector('#statusNetwork span:last-child'), icon: document.querySelector('#statusNetwork i') },
+    wallet: { el: document.getElementById('statusWallet'), textEl: document.getElementById('statusWalletText'), icon: document.querySelector('#statusWallet i') },
+    sync: { el: document.getElementById('statusSync'), textEl: document.getElementById('statusSyncText'), icon: document.querySelector('#statusSync i') },
+    tx: { el: document.getElementById('statusTx'), textEl: document.getElementById('statusTxText'), icon: document.querySelector('#statusTx i') }
+  };
+  const item = map[component];
+  if (!item) return;
+  if (text !== undefined) item.textEl.innerText = text;
+  if (iconClass) {
+    item.icon.className = iconClass;
+  }
+  if (color) {
+    item.icon.style.color = color;
+  }
+}
+
+// Example updates
+function updateStatusOnConnect() {
+  setStatus('wallet', 'Unlocked', 'fas fa-unlock', '#22c55e');
+  setStatus('sync', 'Synced', 'fas fa-check-circle', '#22c55e');
+  setStatus('tx', 'Ready', 'fas fa-check-circle', '#22c55e');
+}
+
+function updateStatusOnLock() {
+  setStatus('wallet', 'Locked', 'fas fa-lock', '#facc15');
+}
+
+function updateStatusOnTxPending() {
+  setStatus('tx', 'Pending...', 'fas fa-spinner fa-spin', '#f59e0b');
+}
+
+function updateStatusOnTxSuccess() {
+  setStatus('tx', 'Success', 'fas fa-check-circle', '#22c55e');
+}
+
+function updateStatusOnTxFailed() {
+  setStatus('tx', 'Failed', 'fas fa-exclamation-circle', '#ef4444');
+}
+
+function updateStatusOnSync() {
+  setStatus('sync', 'Syncing...', 'fas fa-sync-alt fa-spin', '#8b5cf6');
+}
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
         pageLanguage: 'en',
