@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EFC Wiki – Efikcoin Documentation</title>
+  <link rel="icon" href="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+    body { background:#0a0c12; color:#eef2ff; font-size:20px; min-height:100vh; }
+    .container { max-width:1400px; margin:0 auto; padding:2rem; }
+    .glass { background:rgba(15,23,42,0.7); backdrop-filter:blur(24px); border:1px solid rgba(148,163,184,0.15); border-radius:2rem; padding:2rem; }
+    .btn-primary { background:linear-gradient(135deg,#3b82f6,#8b5cf6); border:none; padding:0.8rem 2.5rem; border-radius:3rem; color:white; font-weight:700; font-size:1.2rem; transition:0.3s; cursor:pointer; }
+    .btn-primary:hover { transform:scale(1.03); box-shadow:0 0 30px #8b5cf6aa; }
+    .btn-secondary { background:#1e293b; border:1px solid #475569; padding:0.8rem 2.5rem; border-radius:3rem; color:white; font-weight:600; font-size:1.2rem; transition:0.2s; cursor:pointer; }
+    .btn-secondary:hover { background:#334155; }
+    .btn-gold { background:#d4af37; color:#0a0a0a; border:none; padding:0.8rem 2.5rem; border-radius:3rem; font-weight:700; font-size:1.2rem; transition:0.3s; cursor:pointer; }
+    .btn-gold:hover { transform:scale(1.03); box-shadow:0 0 30px #d4af37aa; }
+    .flex-between { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+    .grid-3 { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:2rem; }
+    .badge { background:#1e293b; padding:0.5rem 1.5rem; border-radius:3rem; font-size:0.9rem; }
+    .nav-link { color:#eef2ff; text-decoration:none; font-weight:600; transition:0.2s; }
+    .nav-link:hover { color:#d4af37; }
+    .wiki-card { background:#1e293b; padding:1.5rem; border-radius:1.5rem; border-left:6px solid #d4af37; margin-bottom:1.5rem; }
+    .status-dot { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:0.5rem; }
+    .status-dot.green { background:#22c55e; }
+    .status-dot.yellow { background:#facc15; }
+    .status-dot.red { background:#ef4444; }
+    .status-dot.purple { background:#8b5cf6; }
+    .timeline { position:relative; padding-left:2rem; border-left:3px solid #d4af37; }
+    .timeline-item { margin-bottom:2rem; }
+    .timeline-item h3 { color:#d4af37; }
+    .rotating-bg { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none; opacity:0.03; display:flex; align-items:center; justify-content:center; }
+    .rotating-bg img { width:600px; height:600px; animation: rotate 60s linear infinite; }
+    @keyframes rotate { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+    @media (max-width:700px) { .grid-2 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<!-- Rotating NFT Background -->
+<div class="rotating-bg"><img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="EFC NFT"></div>
+
+<div class="container">
+  <!-- ===== HEADER ===== -->
+  <header class="flex-between mb-5">
+    <div class="flex gap-3 items-center">
+      <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="Logo" style="width:64px; height:64px; border-radius:50%;">
+      <span class="text-3xl font-bold" style="color:#d4af37;">Efikcoin</span>
+      <span class="badge">Wiki</span>
+    </div>
+    <div class="flex gap-4 items-center">
+      <a href="#" class="nav-link">Home</a>
+      <a href="#" class="nav-link">Wallet</a>
+      <a href="#" class="nav-link nav-link-active" style="color:#d4af37;">Wiki</a>
+      <a href="#" class="nav-link">Whitepaper</a>
+      <a href="https://t.me/ECEcoin18" target="_blank" class="btn-secondary"><i class="fab fa-telegram"></i> Community</a>
+    </div>
+  </header>
+
+  <!-- ===== WIKI CONTENT ===== -->
+  <div class="glass">
+    <h1 class="text-4xl font-bold mb-2" style="color:#d4af37;">📖 EFC Wiki</h1>
+    <p class="text-xl text-gray-400 mb-6">The central knowledge hub for Efikcoin – roadmap, status, documentation, and more.</p>
+
+    <!-- Quick Stats -->
+    <div class="grid-3 mb-6">
+      <div class="glass" style="background:#1e293b;"><i class="fas fa-code-branch text-3xl text-indigo-400"></i><h3>Version</h3><p>v2.4.1 – Stable</p></div>
+      <div class="glass" style="background:#1e293b;"><i class="fas fa-users text-3xl text-indigo-400"></i><h3>Community</h3><p>9,200+ holders</p></div>
+      <div class="glass" style="background:#1e293b;"><i class="fas fa-rocket text-3xl text-indigo-400"></i><h3>Status</h3><p><span class="status-dot green"></span> Live on BSC</p></div>
+    </div>
+
+    <!-- ===== ROADMAP ===== -->
+    <h2 class="text-3xl font-bold mt-6 mb-3">🗺️ Roadmap</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <h3>✅ Q4 2022 – Foundation</h3>
+        <p>Concept & smart contract deployment on BSC. Initial liquidity added.</p>
+      </div>
+      <div class="timeline-item">
+        <h3>✅ Q1 2023 – Ecosystem Launch</h3>
+        <p>Token launch, first exchange listings, community building (9,200+ holders).</p>
+      </div>
+      <div class="timeline-item">
+        <h3>✅ Q2 2023 – Staking & Airdrop</h3>
+        <p>Staking contract (14% APY) and airdrop program activated.</p>
+      </div>
+      <div class="timeline-item">
+        <h3>🔄 Q3 2023 – Wallet & Merchant</h3>
+        <p>Self‑custodial wallet with merchant POS, P2P, and real‑world payments.</p>
+        <span class="status-dot yellow"></span> In progress
+      </div>
+      <div class="timeline-item">
+        <h3>🚀 Q4 2023 – Global Adoption</h3>
+        <p>Multi‑chain expansion, fiat on‑ramps, charity DAO, and education partnerships.</p>
+        <span class="status-dot purple"></span> Planned
+      </div>
+    </div>
+
+    <!-- ===== CURRENT STATUS ===== -->
+    <h2 class="text-3xl font-bold mt-6 mb-3">📊 Current Status</h2>
+    <div class="grid-2">
+      <div class="wiki-card">
+        <h3><i class="fas fa-check-circle text-green-400"></i> Network</h3>
+        <p>BNB Smart Chain – Mainnet</p>
+        <p>RPC: <span class="font-mono">bsc-dataseed.binance.com</span></p>
+      </div>
+      <div class="wiki-card">
+        <h3><i class="fas fa-coins text-gold-400"></i> Token</h3>
+        <p>Symbol: EFC</p>
+        <p>Address: <span class="font-mono text-sm break-all">0x677ce9cba67f7484ea951a12897ce780cfd8fed1</span></p>
+        <a href="https://bscscan.com/token/0x677ce9cba67f7484ea951a12897ce780cfd8fed1" target="_blank" class="text-blue-400">View on BscScan</a>
+      </div>
+      <div class="wiki-card">
+        <h3><i class="fas fa-shield-alt text-green-400"></i> Security</h3>
+        <p>Audit: Verified by <a href="#" class="text-blue-400">CertiK</a> (coming soon)</p>
+        <p>Liquidity: Locked for 2 years</p>
+      </div>
+      <div class="wiki-card">
+        <h3><i class="fas fa-hand-holding-heart text-gold-400"></i> Charity</h3>
+        <p>Treasury: <span class="font-mono text-sm">0x676cCf34C191a9D6EFE4B265b84877C619A559d0</span></p>
+        <p>2% tax allocated to education, food, and water projects.</p>
+      </div>
+    </div>
+
+    <!-- ===== DOCUMENTATION ===== -->
+    <h2 class="text-3xl font-bold mt-6 mb-3">📚 Documentation</h2>
+    <div class="grid-3">
+      <div class="glass" style="background:#1e293b;">
+        <i class="fas fa-file-pdf text-4xl text-indigo-400"></i>
+        <h3>Whitepaper</h3>
+        <p>Read the full vision and tokenomics.</p>
+        <a href="#" class="btn-secondary mt-2">Download</a>
+      </div>
+      <div class="glass" style="background:#1e293b;">
+        <i class="fas fa-code text-4xl text-indigo-400"></i>
+        <h3>Smart Contract</h3>
+        <p>Verified source code on BscScan.</p>
+        <a href="https://bscscan.com/address/0x677ce9cba67f7484ea951a12897ce780cfd8fed1#code" target="_blank" class="btn-secondary mt-2">View Code</a>
+      </div>
+      <div class="glass" style="background:#1e293b;">
+        <i class="fas fa-handshake text-4xl text-indigo-400"></i>
+        <h3>Merchant Guide</h3>
+        <p>How to accept EFC payments in your store.</p>
+        <a href="#" class="btn-secondary mt-2">Read Guide</a>
+      </div>
+    </div>
+
+    <!-- ===== TEAM ===== -->
+    <h2 class="text-3xl font-bold mt-6 mb-3">👥 Core Team</h2>
+    <div class="grid-3">
+      <div class="glass text-center" style="background:#1e293b;">
+        <img src="https://ipfs.io/ipfs/bafybeihrzyodihyp5met2hs32ppj37qlowuxarvs2lnlrgujgrlwxc7fwe" alt="Founder" style="width:80px;height:80px;border-radius:50%;margin-bottom:0.5rem;">
+        <h3>Founder & Lead Dev</h3>
+        <p class="text-gray-400">Driving the vision of "Coin is Life"</p>
+        <a href="https://t.me/ECEcoin18" class="text-blue-400">@ECEcoin18</a>
+      </div>
+      <div class="glass text-center" style="background:#1e293b;">
+        <i class="fas fa-user-circle text-6xl text-gray-500"></i>
+        <h3>Community Manager</h3>
+        <p class="text-gray-400">Building the global community</p>
+      </div>
+      <div class="glass text-center" style="background:#1e293b;">
+        <i class="fas fa-user-circle text-6xl text-gray-500"></i>
+        <h3>Marketing Lead</h3>
+        <p class="text-gray-400">Spreading Efikcoin worldwide</p>
+      </div>
+    </div>
+
+    <!-- ===== CONTRIBUTE ===== -->
+    <div class="glass mt-6 text-center" style="background:#1e293b;">
+      <h2 class="text-2xl font-bold">🤝 Contribute to the Wiki</h2>
+      <p class="text-gray-400">This wiki is open for everyone to improve. Submit a pull request on GitHub.</p>
+      <button class="btn-gold mt-3"><i class="fab fa-github"></i> Create the first page</button>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="text-center text-gray-500 text-lg mt-10 border-t border-gray-800 pt-6">
+    <p>© 2025 Efikcoin – Decentralized for mankind. No data selling.</p>
+    <div class="flex gap-4 justify-center mt-2">
+      <a href="#" class="text-gray-500 hover:text-white">Terms</a>
+      <a href="#" class="text-gray-500 hover:text-white">Privacy</a>
+      <a href="#" class="text-gray-500 hover:text-white">Security</a>
+      <a href="#" class="text-gray-500 hover:text-white">Status</a>
+      <a href="#" class="text-gray-500 hover:text-white">Community</a>
+      <a href="#" class="text-gray-500 hover:text-white">Docs</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
