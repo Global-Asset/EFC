@@ -17,11 +17,15 @@ export default function Home() {
         Global merchant payment system powered by Efikcoin.
       </p>
 
-      <ConnectWallet />
-
-      <EfcBalance
-        wallet={wallet}
+      <ConnectWallet
+        onConnect={setWallet}
       />
+
+      {wallet && (
+        <EfcBalance
+          wallet={wallet}
+        />
+      )}
 
       <h2>
         EFC Contract Address
