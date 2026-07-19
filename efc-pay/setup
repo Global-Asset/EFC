@@ -1,0 +1,68 @@
+efc-pay/
+│
+├── package.json
+├── next.config.js
+├── tsconfig.json
+├── next-env.d.ts
+├── .gitignore
+│
+├── public/
+│   └── logo.png
+│
+└── src/
+    ├── app/
+    │   ├── layout.tsx
+    │   ├── page.tsx
+    │   ├── globals.css
+    │   │
+    │   ├── merchant/
+    │   │   └── page.tsx
+    │   │
+    │   ├── invoice/
+    │   │   └── page.tsx
+    │   │
+    │   ├── dashboard/
+    │   │   └── page.tsx
+    │   │
+    │   ├── settings/
+    │   │   └── page.tsx
+    │   │
+    │   └── api/
+    │       ├── register-merchant/
+    │       │   └── route.ts
+    │       ├── send-payment/
+    │       │   └── route.ts
+    │       ├── confirm-payment/
+    │       │   └── route.ts
+    │       └── balance/
+    │           └── route.ts
+    │
+    ├── components/
+    │   ├── Navbar.tsx
+    │   ├── MerchantForm.tsx
+    │   ├── ConnectWallet.tsx
+    │   ├── EfcBalance.tsx
+    │   ├── EfcPayment.tsx
+    │   ├── PaymentQR.tsx
+    │   ├── SendEfcPayment.tsx
+    │   └── ConfirmPayment.tsx
+    │
+    ├── data/
+    │   ├── merchants.ts
+    │   ├── payments.ts
+    │   └── settings.ts
+    │
+    ├── models/
+    │   ├── Merchant.ts
+    │   └── Payment.ts
+    │
+    ├── types/
+    │   ├── api.ts
+    │   └── paymentApi.ts
+    │
+    ├── hooks/
+    │   └── useWallet.ts
+    │
+    └── lib/
+        ├── transaction.ts
+        └── blockchain.ts
